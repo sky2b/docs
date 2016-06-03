@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>File operations.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>File operations</h1>
+
+<p>After the brief introduction to makefiles and configuration files it is time
+to demonstrate how this all could be used in practice. Lets begin with file
+operations. Our first <code>&lt;file-read/&gt;</code> command reads text from a file and assigns
+its content to the <em>namespace</em> variable:</p>
+
+<pre><code class="language-xml">&lt;!-- file-read target --&gt;
+&lt;all&gt;
+    &lt;!-- read file &quot;data/example-prices.txt&quot; into &quot;content&quot; variable--&gt;
+    &lt;file-read type=&quot;text&quot; file=&quot;data/example-prices.txt&quot; to=&quot;content&quot;/&gt;
+    &lt;!-- print &quot;content&quot; variable--&gt;
+    &lt;print path=&quot;content&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>Which could be executed using <code>addgears -config getting-started.yaml -run file-read</code>
+and should print &ldquo;data/example-prices.txt&rdquo; file content.
+The type attribute allows to read various file types: &ldquo;text&rdquo;, &ldquo;markdown&rdquo;, &ldquo;template&rdquo;,
+&ldquo;template-text&rdquo;, &ldquo;json&rdquo;, &ldquo;yaml&rdquo;.
+Different types are preprocessed accordingly: &ldquo;json&rdquo; and &ldquo;yaml&rdquo; are read as objects,
+templates are parsed as Go templates,
+&ldquo;markdown&rdquo; is converted to HTML.</p>
+
+<p>A companion <code>&lt;file-write/&gt;</code> command writes to files:</p>
+
+<pre><code class="language-xml">&lt;!-- file-write target --&gt;
+&lt;all&gt;
+    &lt;!-- write JSON object to the &quot;data&quot; variable --&gt;
+    &lt;json path=&quot;data&quot;&gt;{
+        &quot;field1&quot;: 1,
+        &quot;field2&quot; : true
+    }&lt;/json&gt;
+    &lt;!-- save the &quot;data&quot; variable to the &quot;data/example-write-file.txt&quot; file in YAML format --&gt;
+    &lt;file-write type=&quot;yaml&quot; file=&quot;data/example-write-file.txt&quot; to=&quot;content&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>The command <code>addgears -config getting-started.yaml -run file-write</code> will create a new file:</p>
+
+<pre><code class="language-yaml">data:
+  field1: 1
+  field2: true
+</code></pre>
+
+<p>CSV format is widely used for data exchange, use <code>&lt;csv&gt;</code> command to import such files:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- read the file, skipping the one line header --&gt;
+    &lt;csv file=&quot;data/example-prices.txt&quot; to=&quot;data&quot; skip=&quot;1&quot;&gt;
+        &lt;!-- the first column is isbn --&gt;
+        &lt;column type=&quot;string&quot; name=&quot;isbn&quot;/&gt;
+        &lt;!-- the second column contains price --&gt;
+        &lt;column type=&quot;float&quot; name=&quot;price&quot;/&gt;
+    &lt;/csv&gt;
+    &lt;!-- print the array of objects read --&gt;
+    &lt;print path=&quot;data&quot;/&gt;
+    &lt;!-- print an operation report --&gt;
+    &lt;print path=&quot;data-report&quot;/&gt;    
+&lt;/all&gt;
+</code></pre>
+
+<p>As a result of import we have an array of objects in namespace variable &ldquo;data&rdquo;
+and an operation report in &ldquo;data-report&rdquo; variable (by default the &ldquo;-report&rdquo; suffix is added).
+The result may look like this:</p>
+
+<pre><code>[map[isbn:9780002258548 price:4] map[isbn:9780003704556 price:5]]
+map[total:2 skipped:0 errors:[]]
+</code></pre>
+
+<p>First we can see an array - objects (map[&hellip;]) in square brackets [].
+Then comes the report. In our case there are only 2 records,
+no errors and no lines was skipped. If we modify our CSV file so that the price column
+will contain a string instead of a float value, we may get an import report with errors:</p>
+
+<pre><code>map[total:1 skipped:1 errors:[map[message:strconv.ParseFloat: parsing &quot;a&quot;: invalid syntax column:2 line:2]]]
+</code></pre>
+
+<p>When we have a big CSV file, we may wish to test our algorithms on some small subset of data. That is where an attribute
+&ldquo;max&rdquo; comes in handy, allowing to read only the limited number of rows.</p>
+
+<p>A companion <code>&lt;csv-write&gt;</code> command writes data to a file:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- write a &quot;data&quot; array into a file, with a header coming first --&gt;
+    &lt;csv-write file=&quot;data/example-write-csv.txt&quot; path=&quot;data&quot; header=&quot;true&quot;&gt;
+        &lt;!-- the first column is isbn --&gt;
+        &lt;column name=&quot;isbn&quot;/&gt;
+        &lt;!-- the second column contains price --&gt;
+        &lt;column name=&quot;price&quot;/&gt;
+    &lt;/csv-write&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>Running this configuration after the <em>namespace</em> command<br />
+(<code>addgears -config getting-started.yaml -run &quot;namespace,csv-write&quot;</code>) we save
+the previously defined data array into a CSV file.</p>
+
+<p>There are other filesystem related commands most notably commands to create,
+copy and remove files and directories. For example
+ To create directories recursively use a <code>&lt;mkdir&gt;</code> command:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- create directory with subdirectory --&gt;
+    &lt;mkdir file=&quot;data/example-write-mkdir/subdirectory&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>To copy directories recursively:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- copy configuration files into subdirectory --&gt;
+    &lt;dir-copy to=&quot;data/example-write-dir-copy/sub&quot; from=&quot;getting-started&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>And finally to remove files and directories created previously run:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- remove files, created by previous commands --&gt;
+    &lt;rm file=&quot;data/example-write*&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

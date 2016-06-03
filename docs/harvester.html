@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Harvester</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_harvester">Harvester</h1>
+
+
+<p>
+	Commands to harvest (crawl) Web pages.
+</p>
+
+
+
+
+
+
+<h3 id=harvester>&lt;harvester></h3>
+
+
+
+
+<p> Harvest (download) web pages for further processing.</p>
+
+
+
+<p> Works with SOCKS5, and HTTP proxies. Able to start Tor proxies on Linux.</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- harvest pages for an array in a &#34;data&#34; variable --&gt;
+    &lt;harvester path=&#34;data&#34; direct=&#34;true&#34; cache=&#34;tmp&#34;&gt;
+        &lt;!-- log request results and make HTTP status code, current array item, HTML page body
+        and harvester namespace variables available in the following &lt;then&gt; block
+        --&gt;
+        &lt;results log=&#34;true&#34; code=&#34;code&#34; item=&#34;item&#34; body=&#34;body&#34; scope=&#34;scope&#34;/&gt;
+        &lt;then&gt;
+            &lt;!-- execute &#34;scraper&#34; command (if any) --&gt;
+            &lt;command path=&#34;scope.scraper&#34;/&gt;
+        &lt;/then&gt;
+    &lt;/harvester&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>timeout</i>
+
+ web request timeout
+
+
+</li>
+
+
+<li><i>direct</i>
+
+ a boolean flag to use direct requests (or use proxies only)
+
+
+</li>
+
+
+<li><i>path</i>
+
+ a path to an array of objects each with one an URL of the page to download
+
+
+</li>
+
+
+<li><i>url</i>
+
+ a path to URL (for each object in the array), defaults to "url"
+
+
+</li>
+
+
+<li><i>cache</i>
+
+ a filepath of a directory containing cached request results
+
+
+</li>
+
+
+<li><i>tor</i>
+
+
+
+
+
+
+<p> Starts Tor gateways (on Linux).</p>
+
+
+
+<pre><code class="language-xml">    &lt;harvester path=&#34;data&#34; direct=&#34;false&#34; cache=&#34;tmp&#34;&gt;
+        &lt;tor port=&#34;1894&#34; total=&#34;10&#34;/&gt;
+    &lt;/harvester&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>port</i>
+
+ a starting port of a port range
+
+
+</li>
+
+
+<li><i>total</i>
+
+ a total number of gateways started
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>proxies</i>
+
+
+
+
+
+
+<p> an XML configuration tag which allows to specify a JSON file, listing all</p>
+
+
+
+<p> available proxies and their options</p>
+
+
+
+<pre><code class="language-xml">{
+	// the first configuration identifier
+	&#34;117.240.187.35:3128&#34;:{
+	    &#34;address&#34;:&#34;https://117.240.187.35:3128&#34;, // proxy address
+	    &#34;username&#34;:&#34;user name (if required)&#34;,
+	    &#34;password&#34;:&#34;password (if required)&#34;,
+	    &#34;timeout&#34;:5000, // timeout in milliseconds (optional)
+	    &#34;disabled&#34;:false // set to true if you don&#39;t like to use this proxy
+	},
+	...
+}
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>config-file</i>
+
+ a path to a proxy configuration file
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>results</i>
+
+
+
+
+
+
+<p> configures Harvester results output</p>
+
+
+
+
+<ul>
+
+<li><i>log</i>
+
+ log results
+
+
+</li>
+
+
+<li><i>body</i>
+
+ a name of the variable containing returned page body
+
+
+</li>
+
+
+<li><i>position</i>
+
+ a variable name for an order number of the current array item
+
+
+</li>
+
+
+<li><i>item</i>
+
+ a variable name for the current array item
+
+
+</li>
+
+
+<li><i>scope</i>
+
+ a variable name for the harvester namespace (scope containing the harvested array)
+
+
+</li>
+
+
+<li><i>code</i>
+
+ a variable name for HTTP status code
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

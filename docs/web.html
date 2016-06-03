@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>HTTP server</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_web">HTTP server</h1>
+
+
+<p>
+	Components to serve static files and to configure API endpoints.
+</p>
+
+
+
+
+
+
+<h3 id=http-handler>&lt;http-handler></h3>
+
+
+
+
+<pre><code class="language-xml">&lt;!-- invokes actions based on the request type found in the &#34;data.type&#34; path --&gt;
+&lt;http-handler action=&#34;data.type&#34;&gt;
+	&lt;!--
+	Components inside &lt;before&gt; section are executed before any other
+	actions. If any component inside &lt;before&gt; section populates
+	&#34;reply&#34; variable no further actions are invoked. This makes &lt;before&gt;
+	section an ideal place to check user access rights
+	--&gt;
+	&lt;before&gt;
+		&lt;!-- we parse JWT token and do common checks here --&gt;
+		{{ template &#34;authentication.xml&#34; . }}
+	&lt;/before&gt;
+	&lt;!-- extract JSON object in a &#34;data&#34; form value and put it into &#34;data&#34; variable  --&gt;
+	&lt;request form-value=&#34;data&#34; to=&#34;data&#34; type=&#34;json&#34;/&gt;
+	&lt;!-- after action was executed we look for a value in a &#34;reply&#34; path,
+	to serialize it and sent back as a reply.
+	--&gt;
+	&lt;response path=&#34;reply&#34;/&gt;
+	&lt;!-- this is &#34;test&#34; action for our private API endpoint  --&gt;
+	&lt;action type=&#34;test&#34;&gt;
+		&lt;!-- some configuration for &#34;test&#34; action --&gt;
+	&lt;/action&gt;
+&lt;/http-handler&gt;
+</code></pre>
+
+
+
+
+<p> Configure how incoming POST HTTP requests should be handled.
+You first need to lay out the the general data flow: how data from incoming requests populate
+namespace variables and which namespace variables are used to generate request reply.
+Then you may define actions invoked for different request types.
+</p>
+
+
+
+
+<ul>
+
+<li><i>before</i>
+
+
+		components inside &lt;before&gt; section will be executed before any other actions.
+		If the &lt;response&gt; variable is populated by any of these components,
+		this result will be returned to the user, no further actions are invoked
+
+
+
+</li>
+
+
+<li><i>action</i>
+
+ a namespace path to the variable containing action name
+
+
+</li>
+
+
+<li><i>request</i>
+
+
+
+
+
+
+<p> Every HTTP request comes with some data - URL encoded key/value pairs. They are
+often called form values as they originally where populated by by HTML form inputs,
+although today they are more often populated by page Javascript, or by other applications.
+Request component allows
+</p>
+
+
+
+
+<ul>
+
+<li><i>form-value</i>
+
+ a key (name) of a form value
+
+
+</li>
+
+
+<li><i>type</i>
+
+ a type of the form value (text by default)). Often form value contains JSON encoded object. To parse it specify "json".
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path where to save extracted request data
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>response</i>
+
+
+
+
+
+
+<p> Configure HTTP request response</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace variable containing a request response, serialized as JSON object and sent as a plain text in the reply
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>action</i>
+
+
+
+
+
+
+<p> Contains configuration (child components) invoked for requests of the specified type</p>
+
+
+
+
+<ul>
+
+<li><i>type</i>
+
+ a comma separated list of action types, invoking this configuration
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=web-server>&lt;web-server></h3>
+
+
+
+
+<p> Serve static files</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- start server, port number 0 instructs to bind to any free port --&gt;
+&lt;web-server address=&#34;http://localhost:0&#34;&gt;
+    &lt;!-- serve files of a &#34;static&#34; directory on &#34;/public&#34;  --&gt;
+    &lt;directory path=&#34;/public/&#34; directory=&#34;static&#34; strip-prefix=&#34;/public/&#34;/&gt;
+&lt;/web-server&gt;
+</code></pre>
+
+
+
+
+<p> Or configure API endpoints</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- start server on http://localhost:1895 --&gt;
+&lt;web-server address=&#34;http://localhost:1895&#34;&gt;
+    &lt;!-- serve static directory on http://localhost:1895/public/ --&gt;
+    &lt;directory path=&#34;/public/&#34; directory=&#34;static&#34; strip-prefix=&#34;/public/&#34;/&gt;
+    &lt;!-- add API endpoint on http://localhost:1895/api/public --&gt;
+    &lt;endpoint path=&#34;/api/public&#34;&gt;
+        &lt;!-- our HTTP handler executes actions based on the request type (found in &#34;data.type&#34;) --&gt;
+        &lt;http-handler action=&#34;data.type&#34;&gt;
+            &lt;!-- extract JSON object from &#34;data&#34; form value and populate our &#34;data&#34; variable  --&gt;
+            &lt;request form-value=&#34;data&#34; to=&#34;data&#34; type=&#34;json&#34;/&gt;
+            &lt;!-- we specify that after an action was executed we take the value in a &#34;reply&#34; variable,
+            serialize it as a JSON object and send it back as a plain text
+            --&gt;
+            &lt;response path=&#34;reply&#34;/&gt;
+            &lt;!-- now we can define &#34;test&#34; action (executed when &#34;test&#34; is the value in &#34;data.type&#34;) --&gt;
+            &lt;action type=&#34;test&#34;&gt;
+                &lt;!-- print data received (which contains form value &#34;data&#34;, according to the configuration above) --&gt;
+                &lt;print path=&#34;data&#34;/&gt;
+                &lt;!-- and send a reply by assigning data to previously configured variable --&gt;
+                &lt;json&gt;{&#34;reply&#34;: {&#34;result&#34;:&#34;done&#34;} }&lt;/json&gt;
+            &lt;/action&gt;
+        &lt;/http-handler&gt;
+    &lt;/endpoint&gt;
+&lt;/web-server&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>async</i>
+
+ a boolean flag to start web server asynchronously (in another thread), for example to start the second web server
+
+
+</li>
+
+
+<li><i>address</i>
+
+ an address (scheme, domain, port number) of a web server
+
+
+</li>
+
+
+<li><i>certificate</i>
+
+  a certificate file (for HTTPS protocol)
+
+
+</li>
+
+
+<li><i>key</i>
+
+  the matching private key (for HTTPS protocol)
+
+
+</li>
+
+
+<li><i>endpoint</i>
+
+
+
+
+
+
+<p> Configures API endpoints.</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a URL path of the endpoint
+
+
+</li>
+
+
+<li><i>http-handler</i>
+
+ XML tag to configure API endpoint handlers, (see <code>&lt;http-handler&gt;</code> tag for details)
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>directory</i>
+
+
+
+
+
+
+<p> Configures how to serve static files</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a URL path of the static files directory
+
+
+</li>
+
+
+<li><i>directory</i>
+
+ a file path to the directory containing static files served
+
+
+</li>
+
+
+<li><i>strip-prefix</i>
+
+ a prefix, removed from the request URL's path
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

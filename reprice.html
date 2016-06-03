@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Repricing books based on competition on Amazon (using array functions)</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>Repricing books based on competition on Amazon</h1>
+
+<p>We very often need to work with data collections. There are a few components which
+can help with such tasks. For simple cases when we just need to iterate over a
+list of elements we may just use an <code>&lt;each&gt;</code> component. For example to print the scraped
+offers for books on Amazon from our previous examples we may just use the following
+configuration:</p>
+
+<pre><code class="language-xml">&lt;!-- iterate over &quot;data&quot; array  --&gt;
+&lt;each path=&quot;data&quot;&gt;
+    &lt;!-- for each book print &quot;listing&quot; property (do not limit maximum output length) --&gt;
+    &lt;print path=&quot;listing&quot; max=&quot;-1&quot;/&gt;
+&lt;/each&gt;
+</code></pre>
+
+<p>Which, when invoked after &ldquo;scrape-listings&rdquo; target (<code>-run &quot;scrape-listings,print-listings&quot;</code>),
+outputs offers for two books in our example.</p>
+
+<p>When someone needs more power, they may use an <code>&lt;array&gt;</code> component.
+It allows us to configure the following operations:
+define new properties on array elements (using assignments, mathematical expressions and control structures),
+sort arrays on any field,
+filter away array elements (defining list of boolean expressions), take first n elements,
+and calculate aggregate functions (average, minimum, maximum, sum, count, etc.).
+These operations are executed exactly in the order they are listed above. Chaining multiple
+<code>&lt;array&gt;</code> components someone may perform practically any operation
+commonly needed for repricing.</p>
+
+<p>As an example, the listing property above is the array,
+containing offers from different Amazon sellers. To price our items competitively we
+we may wish for every offer calculate the price of the offer plus shipment price
+and set our price to the minimum value among the sellers:</p>
+
+<pre><code class="language-xml">&lt;!-- the pricer target --&gt;
+&lt;!-- iterate over the list of our books --&gt;
+&lt;each path=&quot;data&quot;&gt;
+    &lt;!-- for each offer --&gt;
+    &lt;array path=&quot;listing.offers&quot;&gt;
+        &lt;!-- find price plus shipping fees --&gt;
+        &lt;expression&gt;
+            total = price + shippingPrice
+        &lt;/expression&gt;
+        &lt;!-- our price is the minimum &quot;total&quot; value --&gt;
+        &lt;aggregate&gt;
+            &lt;min path=&quot;total&quot; to=&quot;price&quot;/&gt;
+        &lt;/aggregate&gt;
+    &lt;/array&gt;
+    &lt;print path=&quot;price&quot;/&gt;
+&lt;/each&gt;
+</code></pre>
+
+<p>We may also play with other options available. For example find the average using
+<code>&lt;avg path=&quot;total&quot; to=&quot;price&quot;/&gt;</code> function. Or take only the first three
+elements of the array to calculate the average using <code>&lt;first n=&quot;3&quot;/&gt;</code>. Or penalize
+sellers with low feedback by adding 0.3 USD to the price using &ldquo;if&rdquo; control statements
+in <code>&lt;expression&gt;</code>.</p>
+
+<p>In expressions we may use Go language syntax and a few extensions,
+like &ldquo;matches regular expression&rdquo; operator &ldquo;~&rdquo; (and reverse &ldquo;!~&ldquo;), and Javascript
+conventions to treat 0, empty string and nil as false in boolean expressions (and
+everything else as true). A <code>&lt;filter&gt;</code> subsection of the <code>&lt;array&gt;</code> component
+may also help to filter offers based on the set of boolean expressions.</p>
+
+<pre><code class="language-xml">&lt;!-- an example demonstrating some other &lt;array&gt; component capabilities --&gt;
+&lt;array path=&quot;listing.offers&quot;&gt;
+    &lt;!--
+    Filter away elements which return false on any conditional expression. In
+    our case we check that &quot;condition&quot; property contains &quot;Good&quot; string and &quot;sellerName&quot;
+    doesn't contain &quot;my&quot;.
+    --&gt;
+    &lt;filter&gt;
+        condition ~ &quot;Good&quot;
+        sellerName !~ &quot;my&quot;
+    &lt;/filter&gt;
+
+    &lt;expression&gt;
+        total = price + shippingPrice
+        if feedback &lt; 1300 {
+            total += 0.3
+        }
+    &lt;/expression&gt;
+    &lt;first n=&quot;3&quot;/&gt;
+    &lt;aggregate&gt;
+        &lt;avg path=&quot;total&quot; to=&quot;price&quot;/&gt;
+    &lt;/aggregate&gt;
+&lt;/array&gt;
+</code></pre>
+
+<p>Although powerful by themselves when combined and used with other components, like
+control structures and scripting components, array components allow quickly
+configure practically any array processing algorithm.</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

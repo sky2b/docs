@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Array functions</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_array">Array functions</h1>
+
+
+<p>
+	Components to transform arrays
+</p>
+
+
+
+
+
+
+<h3 id=array>&lt;array></h3>
+
+
+
+
+<p> Map, filter, aggregate, sort arrays of objects</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- iterate over the list of our books --&gt;
+&lt;each path=&#34;data&#34;&gt;
+    &lt;!-- for each offer --&gt;
+    &lt;array path=&#34;listing.offers&#34;&gt;
+        &lt;!-- find price plus shipping fees --&gt;
+        &lt;expression&gt;
+            total = price &#43; shippingPrice
+        &lt;/expression&gt;
+        &lt;!-- our price is the minimum &#34;total&#34; value --&gt;
+        &lt;aggregate&gt;
+            &lt;min path=&#34;total&#34; to=&#34;price&#34;/&gt;
+        &lt;/aggregate&gt;
+    &lt;/array&gt;
+    &lt;print path=&#34;price&#34;/&gt;
+&lt;/each&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to array
+
+
+</li>
+
+
+<li><i>filter</i>
+
+
+
+
+
+
+<p>
+    Filters away elements for which any of boolean expressions the tag contains is not true.
+    There could be many filters and multiple boolean expressions each on a separate line.
+    The syntax of the expressions is compatible with the syntax of Go language.
+    Additionally when expression doesn&#39;t return a boolean value we use Javascript conventions:
+    zero, empty string, nil - are treated as a boolean false, all other values as true.
+</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+</li>
+
+
+<li><i>first</i>
+
+
+
+
+
+
+<p>
+    Take only first n elements of the array.
+</p>
+
+
+
+
+<ul>
+
+<li><i>n</i>
+
+ the number of array elements to take
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>sort</i>
+
+
+
+
+
+
+<p>
+    Sort the array.
+</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to the property along which the array is sorted
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>expression</i>
+
+
+
+
+
+
+<p>
+    Expression which is executed for every element of the array. If
+    index or scope attributes are present, they give the name of a property
+    which will contain element position or the namespace (or scope) of the &amp;lt;array&amp;gt;
+    component. These values are removed from elements after expression was calculated.
+</p>
+
+
+
+
+<ul>
+
+<li><i>index</i>
+
+ a name for element position in the array
+
+
+</li>
+
+
+<li><i>scope</i>
+
+ a name for the scope object
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>empty</i>
+
+ a container, which is executed when array is empty
+
+
+</li>
+
+
+<li><i>aggregate</i>
+
+
+
+
+
+
+<p>
+        Configures aggregate functions executed on the array of objects. Average,
+        sum, etc are found along some axes (object properties). There could be
+        multiple aggregate functions called along deferent axes (properties).
+</p>
+
+
+
+
+<ul>
+
+<li><i>avg</i>
+
+
+
+
+
+
+<p>
+    Calculate an average value.
+</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of the property to average
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for the operation result
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>sum</i>
+
+
+
+
+
+
+<p>
+    Calculate the sum of elements.
+</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of the property to sum
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for the operation result
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>min</i>
+
+
+
+
+
+
+<p>
+    Find minimum.
+</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of the property of which we want to find minimum
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for the operation result
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>max</i>
+
+
+
+
+
+
+<p>
+    Find maximum.
+</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of the property of which we want to find maximum
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for the operation result
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>count</i>
+
+
+
+
+
+
+<p>
+    A total number of elements in the array.
+</p>
+
+
+
+
+<ul>
+
+<li><i>to</i>
+
+ a namespace path for the operation result
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

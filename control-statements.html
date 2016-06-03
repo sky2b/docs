@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Control statements</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>Control statements</h1>
+
+<p>AddPricer has a few general purpose components which change the common sequential
+flow of components execution. They behave in the same way as similar statements in
+programming languages. As the idea of AddPricer is to provide a tool which helps
+to solve common development problems in a declarative, configurable way, these control
+flow elements somewhat contradict to its spirit. Excessive use of such elements may
+signal either that the task should be approached differently or that we lack a component
+to deal with the problem effectively. Still in some cases the use of flow controls can be
+appropriate and effective solution.</p>
+
+<p>An <code>&lt;if&gt;/&lt;elseif&gt;/&lt;else&gt;</code> component executes
+components based on a set of arbitrary conditions. An &ldquo;e&rdquo; attribute of <code>&lt;if&gt;</code> may
+contain boolean expression. Expressions have
+access to current namespace variables. The syntax is similar to the syntax of a Google Go language.
+There is additionally &ldquo;matches regular expression&rdquo; operator &ldquo;~&rdquo; (and opposite &ldquo;!~&ldquo;).
+And Javascript conventions are used when converting values to booleans (0, empty
+string and nil are treated as false and all other values as true). Alternatively,
+instead of the &ldquo;e&rdquo; attribute,
+a &ldquo;defined&rdquo; attribute could be used to test that a variable at specified path is
+defined (has some value):</p>
+
+<pre><code class="language-xml">&lt;if e=&quot;price &lt; 0.1 || num == 0&quot;&gt;
+    &lt;!-- executed when expression &quot;price &lt; 0.1 || num == 0&quot; evaluates to true --&gt;
+    &lt;then&gt;
+        &lt;json&gt;{&quot;status&quot;:&quot;error&quot;}&lt;/json&gt;
+    &lt;/then&gt;
+    &lt;!-- otherwise check that &quot;last.total&quot; path contains any value --&gt;
+    &lt;elseif defined=&quot;last.total&quot;&gt;
+        &lt;then&gt;
+            &lt;json&gt;{&quot;status&quot;:&quot;ready&quot;}&lt;/json&gt;
+        &lt;/then&gt;
+    &lt;/elseif&gt;
+    &lt;!-- as a last resort, if no elseif condition was met this block is executed--&gt;
+    &lt;else&gt;
+        &lt;json&gt;{&quot;status&quot;:&quot;waiting&quot;}&lt;/json&gt;
+    &lt;/else&gt;
+&lt;/if&gt;    
+</code></pre>
+
+<p>When component for some reason can&rsquo;t perform some action, by convention it returns an error.
+In case of any problems during command execution, an error is raised to parent components, until, finally,
+AddPricer exits. This in most cases is the best strategy which helps to detect any
+problems as soon as possible. But sometimes, instead or before the exit we may
+wish to take certain actions. For this we may use try/catch/finally components.</p>
+
+<pre><code class="language-xml">&lt;try&gt;
+    &lt;block&gt;
+        &lt;comp1/&gt;
+        &lt;comp2/&gt;
+    &lt;/block&gt;
+    &lt;catch&gt;
+        &lt;comp3/&gt;
+    &lt;/catch&gt;
+    &lt;finally&gt;
+        &lt;comp4/&gt;
+    &lt;/finally&gt;
+&lt;/try&gt;  
+</code></pre>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

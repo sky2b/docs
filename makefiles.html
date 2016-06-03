@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Makefiles.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>Makefiles</h1>
+
+<p>The purpose of <em>AddPricer</em> makefiles is to assemble <em>xml</em> configuration files and
+to define and execute user selected targets. If you open the <em>getting-started.yaml</em>
+makefile, we already used in our pretty contrived namespace example, you may
+discover that it contains the following <em>namespace</em> target definition:</p>
+
+<pre><code class="language-yaml">namespace:
+    # main template name
+    run: namespace.xml
+    # files used to generate configuration
+    config: getting-started/*.xml
+</code></pre>
+
+<p>A makefile <em>target</em> may contain either a task configuration
+(a set of  options as in the example above) or it could be an alias to another target:</p>
+
+<pre><code class="language-yaml">#  just the alias to the &quot;namespace&quot; target
+print: namespace
+</code></pre>
+
+<p>Or targets:</p>
+
+<pre><code class="language-yaml">#  execute first some &quot;clean&quot; target and then &quot;print&quot; target
+clean-print:
+    - clean
+    - print
+</code></pre>
+
+<p>As you may notice later, this is a common pattern. Not only makefile targets, but
+many other options could be
+either strings or string lists too.</p>
+
+<p>There are only four target options: <em>config</em>, <em>run</em>, <em>params</em> and <em>file</em>.</p>
+
+<p>The <em>config</em> option is a <a href="https://en.wikipedia.org/wiki/Glob_(programming)">glob pattern</a>,
+matching configuration files used to generate the target configuration.
+It could be either one glob pattern or a list of glob patterns:</p>
+
+<pre><code class="language-yaml">target:
+    # the name of the main, executed template
+    run: main.xml
+    # list of glob patterns
+    config:
+        - config/*.xml
+        - common/*.xml
+</code></pre>
+
+<p>Matching configuration files are treated as <a href="https://golang.org/pkg/html/template/">Go HTML templates</a>
+This means, among the rest, that inside configuration files you may reference parameters and
+other configuration files using <code>{{ .parameter1 }}</code> and <code>{{template &quot;another-file.xml&quot; . }}</code>
+syntax respectively. For documentation please refer to Go
+template <a href="https://golang.org/pkg/text/template/#hdr-Actions">actions</a>.
+Also please note, that template parser is smart enough to
+properly escape
+XML attributes and content (but as a result you can&rsquo;t use CDATA sections as they are escaped too).</p>
+
+<p>The name of the main, executed template file is given by the makefile option <em>run</em>.
+When executed, main template must generate a valid <em>XML</em> configuration.<br />
+For example, some our configuration
+file could look like this:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- includes the &quot;setup.xml&quot; template --&gt;
+    {{template &quot;setup.xml&quot; . }}
+    &lt;!-- total is assigned to &quot;num&quot; parameter value  --&gt;
+    &lt;json&gt;{&quot;total&quot;:{{ .num }}}&lt;/json&gt;
+    &lt;print path=&quot;total&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p><em>Template variables</em> or <em>parameters</em>
+could be defined using the makefile <em>params</em> option. This option cold be either an object:</p>
+
+<pre><code class="language-yaml">target:
+    # parameter &quot;num&quot; definition
+    params: {&quot;num&quot;:5}
+</code></pre>
+
+<p>or a glob pattern(s) of <em>yaml</em> files, containing parameter definitions.</p>
+
+<pre><code class="language-yaml">target:
+    # two glob patterns to *yaml* files
+    params:
+        - common/*.yaml
+        - current/*.yaml
+</code></pre>
+
+<p>When makefile generates targets, parameters are passed from target to target,
+old values are overwritten by most recent <em>params</em> definitions.</p>
+
+<p>The executed makefile target is selected through the <em>-run</em> addgears parameter (otherwise the <em>default</em> target is invoked).
+It is also possible to specify multiple targets (separated by commas): <code>addgears -run &quot;target1,target2&quot;</code></p>
+
+<p>Yet another possibility is to combine makefiles using the <em>file</em> makefile option. All targets from the matching
+makefile(s) are added to the targets already present (existing targets remain unchanged). Inclusion targets
+(containing <em>file</em> option) are executed non-conditionally at the beginning of makefile execution (other options are ignored).</p>
+
+<pre><code class="language-yaml">include:
+    # include targets defined in file1.yaml, file2.yaml
+    file:
+        - file1.yaml
+        - file2.yaml
+</code></pre>
+
+<p>The only exception - when target has both <em>file</em> and <em>run</em> options. In that case file is not included, but
+executed and only when this target is selected. When executed, it executes the <em>run</em> target,
+defined in the other makefile:</p>
+
+<pre><code class="language-yaml">target1:
+    # by executing &quot;target1&quot; we actually execute &quot;target2&quot; from the file1.yaml make file
+    file: file1.yaml
+    run: target2
+</code></pre>
+
+<p>And finally we should mention two special targets: configuration target <code>@</code>, allowing
+to configure an executor (considered in the Debugging), and <code>*</code> - run first target which is
+always executed first and is a good place to use the <code>params</code> option to read configuration parameters:</p>
+
+<pre><code class="language-yaml">&quot;*&quot;:
+    # read global configuration parameters
+    params: getting-started/config.yaml
+</code></pre>
+
+<h1>Debugging</h1>
+
+<p>To trace an origin of various configuration problems, there are a few tools available. First of all you can use
+<code>&lt;print&gt;</code> command to print a namespace or its distinct paths. To simplify debugging problem, split
+complex tasks into subtasks, define a set of common print targets (e.g. <print/>, <print path="data"/>, etc.)
+and run the appropriate print target after the task being developed (e.g. <code>addgears -run &quot;tested-target,print&quot;</code>).</p>
+
+<p>Another set of tools is provided by the special configuration target <code>&quot;@&quot;</code>:</p>
+
+<pre><code class="language-yaml"># a special configuration target, used to pass a few application options
+&quot;@&quot;:
+    # print target options and generated configuration
+    print-config: true
+    # print current namespace before each target execution
+    print-namespace: true
+</code></pre>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

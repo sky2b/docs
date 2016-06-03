@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>JWT</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_jwt">JWT</h1>
+
+
+<p>
+	Components to sign, parse and generate keys for JSON Web Tokens (JWT).
+</p>
+
+
+
+
+
+
+<h3 id=jwt>&lt;jwt></h3>
+
+
+
+
+<p>
+The main components to work with JWT. For example you can parse token in a string:
+</p>
+
+
+
+<pre><code class="language-xml">&lt;!--
+Parse a JWT token, for which we need only a public key.
+The key could be found in the &#34;keys&#34; directory. It should not be generated here.
+--&gt;
+&lt;jwt dir=&#34;keys&#34; generate=&#34;false&#34;&gt;
+    &lt;!-- file containing public key --&gt;
+    &lt;public file=&#34;jwt.pub&#34;/&gt;
+    &lt;!-- parse the string which could be found in a &#34;token&#34; field of the user request --&gt;
+    &lt;parse path=&#34;data.token&#34; to=&#34;token&#34;&gt;
+        &lt;!-- in case of any error, we may just return a JSON object with an error description --&gt;
+        &lt;error&gt;
+            &lt;json&gt;{&#34;reply&#34;:{&#34;error&#34;:&#34;not authenticated&#34;}}&lt;/json&gt;
+        &lt;/error&gt;
+    &lt;/parse&gt;
+&lt;/jwt&gt;
+</code></pre>
+
+
+
+
+<p>
+Or you could sign an object and create a token:
+</p>
+
+
+
+<pre><code class="language-xml">&lt;!--
+sign using JWT keys found in &#34;keys&#34; directory,
+generate new keys if no keys found
+--&gt;
+&lt;jwt dir=&#34;keys&#34; generate=&#34;true&#34;&gt;
+	&lt;!-- private key (to sign JWT token ) --&gt;
+	&lt;private file=&#34;jwt.pri&#34;/&gt;
+	&lt;!--
+	sign &#34;token&#34; object and place generated JWT
+	to &#34;reply.token&#34; path
+	--&gt;
+	&lt;sign path=&#34;token&#34; to=&#34;reply.token&#34;/&gt;
+&lt;/jwt&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>dir</i>
+
+ directory containing key files
+
+
+</li>
+
+
+<li><i>generate</i>
+
+ a boolean flag to generate private and public keys
+
+
+</li>
+
+
+<li><i>public</i>
+
+
+
+
+
+
+<p> configures public key</p>
+
+
+
+
+<ul>
+
+<li><i>file</i>
+
+ a file name of the file containing a public key (in a directory specified in <jwt> component)
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>private</i>
+
+
+
+
+
+
+<p> configures private key</p>
+
+
+
+
+<ul>
+
+<li><i>file</i>
+
+ a file name of the file containing a private key (in a directory specified in <jwt> component)
+
+
+</li>
+
+
+<li><i>key-bits</i>
+
+ RSA key length in bits (4096 by default)
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>sign</i>
+
+
+
+
+
+
+<p> signs a specified object using a private key to create a new JWT token</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to the object to be singed
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for the generated JWT token
+
+
+</li>
+
+
+<li><i>timeout</i>
+
+ timeout (in hours)
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>parse</i>
+
+
+
+
+
+
+<p> parse JWT tokens and extract claims they contain</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of the token
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path where the parsed token object will be extracted
+
+
+</li>
+
+
+<li><i>then</i>
+
+ container for components executed after the token was successfully extracted
+
+
+</li>
+
+
+<li><i>error</i>
+
+ container for components executed after the token was successfully extracted
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

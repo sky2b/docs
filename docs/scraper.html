@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Web scraper</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_scraper">Web scraper</h1>
+
+
+<p>
+	Components to scrape HTML pages and extract data. The main &lt;scraper&gt; component
+	receives an HTML string and builds a DOM tree. Child subcomponents (&lt;each/&gt;, &lt;property&gt;)
+	select HTML elements using CSS selectors. Filters convert HTML elements to
+	strings and further extract information in a configurable data format.
+</p>
+
+
+
+
+
+
+<h3 id=each>&lt;each></h3>
+
+
+
+
+<p> A child subcomponent of &lt;scraper&gt;. Its selector matches multiple HTML blocks, and then
+ extracts an array of properties.
+</p>
+
+
+
+
+<ul>
+
+<li><i>name</i>
+
+ a namespace path for the extracted array
+
+
+</li>
+
+
+<li><i>selector</i>
+
+ a CSS selector selecting an array of HTML blocks
+
+
+</li>
+
+
+<li><i>property</i>
+
+ child tags, to configure properties extracted for every HTML block matched.
+
+ (see <code>&lt;property&gt;</code> tag for details)
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=filter:attr>&lt;filter:attr></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts one attribute of HTML element.</p>
+
+
+
+
+<ul>
+
+<li><i>name</i>
+
+ an attribute name
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=filter:exists>&lt;filter:exists></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Returns a boolean value, false
+if the current  selection is empty. </p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:first>&lt;filter:first></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Returns the first element in a current selection.</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:html>&lt;filter:html></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Converts an HTML selection to an HTML string.</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:int>&lt;filter:int></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts an HTML selection as
+ an integer. Finds the first sequence of characters matching an integer number. </p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:last>&lt;filter:last></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Returns the last HTML element in a current selection.</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:number>&lt;filter:number></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts a number. First if necessary extracts text.
+ Then finds the first sequence of characters matching a floating point number. </p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:regex>&lt;filter:regex></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts a string matching regular expression pattern.</p>
+
+
+
+
+<ul>
+
+<li><i>pattern</i>
+
+ a regular expression pattern
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=filter:replace>&lt;filter:replace></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Converts an input value to a string.
+Substrings matching regular expression are replaced with the replacement value provided
+or removed if no replacement was given. </p>
+
+
+
+
+<ul>
+
+<li><i>pattern</i>
+
+ a regular expression
+
+
+</li>
+
+
+<li><i>replacement</i>
+
+ a replacement value
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=filter:text>&lt;filter:text></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts a text.</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=filter:trim>&lt;filter:trim></h3>
+
+
+
+
+<p> A child subcomponent of a &lt;property&gt; component. Extracts a trimmed string.</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=property>&lt;property></h3>
+
+
+
+
+<p> A child subcomponent of &lt;scraper&gt; or &lt;each&gt; component. Extracts one property from HTML selection.</p>
+
+
+
+
+<ul>
+
+<li><i>name</i>
+
+ an extracted property path
+
+
+</li>
+
+
+<li><i>selector</i>
+
+ a CSS selector selecting HTML elements to work with
+
+
+</li>
+
+
+<li><i>first</i>
+
+ a  boolean flag attribute, instructs to select only the first element matched by the selector
+
+
+</li>
+
+
+<li><i>filter</i>
+
+ a set of filters to extract, clean and convert data. The first filter receives HTML selection as its input
+value, subsequent filters operate on the value received from a previous filter.
+See <i>filter:</i> components for possible filter types.
+
+
+
+</li>
+
+
+<li><i>property</i>
+
+ child tags to configure sub-properties (operating on current property selection)
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=scraper>&lt;scraper></h3>
+
+
+
+
+<p>A top level component to parse an HTML page. Takes HTML string and creates HTML DOM tree,
+which could be queried using CSS selectors.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- the component takes an HTML of listings on Amazon site from &#34;body&#34; variable
+and saves extracted data to a &#34;listing&#34; variable
+--&gt;
+&lt;scraper path=&#34;body&#34; to=&#34;item.listing&#34;&gt;
+	&lt;!-- parse a page contains multiple HTML blocks with offers from different Amazon sellers.
+	We select these blocks and save extracted information into &#34;offers&#34; array.
+	--&gt;
+	&lt;each name=&#34;offers&#34; selector=&#34;.olpOffer&#34;&gt;
+		&lt;!-- check the current seller is &#34;supersaver&#34; (an HTML block contains an
+		HTML element with &#34;supersaver&#34; CSS class )--&gt;
+	    &lt;property name=&#34;supersaver&#34; selector=&#34;.supersaver&#34;&gt;
+	        &lt;!-- true if selector matches any HTML element --&gt;
+	  		&lt;exists/&gt;
+	  	&lt;/property&gt;
+	  	&lt;property name=&#34;price&#34; selector=&#34;.olpOfferPrice&#34;&gt;
+	        &lt;!-- find and extract floating point number (using regular expression matching
+			a sequence of digits and an optional decimal point)  --&gt;
+	  		&lt;number/&gt;
+	  	&lt;/property&gt;
+	  	&lt;property name=&#34;shippingPrice&#34; selector=&#34;.olpShippingPrice&#34;&gt;
+	  		&lt;number/&gt;
+	  	&lt;/property&gt;
+	  	&lt;property name=&#34;sellerName&#34; selector=&#34;.olpSellerName&#34;&gt;
+	        &lt;!-- leading and trailing white spaces are removed --&gt;
+	  		&lt;trim/&gt;
+	  	&lt;/property&gt;
+	  	&lt;property name=&#34;condition&#34; selector=&#34;.olpCondition&#34;&gt;
+	  		&lt;trim/&gt;
+	        &lt;!-- remove white spaces around dashes.
+			Regular expression pattern matches dash with leading and trailing spaces
+			and replaces the matched sequence with one dash. --&gt;
+	  		&lt;replace pattern=&#34;\s*-\s*&#34; replacement=&#34;-&#34; /&gt;
+	  	&lt;/property&gt;
+	    &lt;property name=&#34;rating&#34; selector=&#34;.olpSellerColumn p a&#34;&gt;
+	        &lt;!-- extract an integer (find the first sequence of digits)--&gt;
+	  		&lt;int/&gt;
+	  	&lt;/property&gt;
+	    &lt;property name=&#34;feedback&#34; selector=&#34;.olpSellerColumn p&#34;&gt;
+	        &lt;!-- find an opening bracket followed by digits and comma --&gt;
+	  		&lt;regex pattern=&#34;\([0-9,]&#43;&#34; /&gt;
+	        &lt;!-- remove bracket and comma (default replacement is an empty string) --&gt;
+	  		&lt;replace pattern=&#34;[(,]&#34;/&gt;
+	        &lt;int/&gt;
+	  	&lt;/property&gt;
+	&lt;/each&gt;
+&lt;/scraper&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to HTML page
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path where to save extracted data
+
+
+</li>
+
+
+<li><i>selector</i>
+
+ a selector to match a root element
+
+
+</li>
+
+
+<li><i>each</i>
+
+ child tags configuring array properties (see <code>&lt;each&gt;</code> tag for details)
+
+
+</li>
+
+
+<li><i>property</i>
+
+ child tags configuring extracted properties (see <code>&lt;property&gt;</code> tag for details)
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

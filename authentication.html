@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>User authentication.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>User authentication</h1>
+
+<p>Often there is a need to limit access to your server resources. Now when we know
+how public API endpoint could be created, we may wish to configure user
+authentication system. Our system is based on <a href="https://jwt.io/">JSON Web Tokens (JWT)</a>. JWT
+allow you to sign arbitrary JSON objects, creating tokens which later could be used
+to restrict user access to server resources.</p>
+
+<p>To work with JWT, AddPricer has a <code>&lt;jwt&gt;</code> component to sign and parse JWT tokens.
+To illustrate how it is working we consider how authentication could be added to the
+web server we created before. We also extend functionality of our &ldquo;test.html&rdquo; page
+and will create the Javascript playground, which will allow us to test our server
+actions using JQuery <code>ajax</code> command.</p>
+
+<p>First of all we need to create an authentication service, which will check user
+ credentials and generate signed tokens. Such service actually may live on a
+ separate server - other services need only to have a public key, to be able to parse
+ encrypted tokens. But for the sake of simplicity, here, we just add required actions
+ to our &ldquo;/api/public&rdquo; endpoint configuration.</p>
+
+<p>To handle user authentication requests, we create <em>login.xml</em> file and include
+ it after an <code>&lt;action type=&quot;test&quot;&gt;</code> action in the &ldquo;api.xml&rdquo; configuration file
+ (using <code>{{ template &quot;login.xml&quot; . }}</code>).
+ In our &ldquo;login.xml&rdquo; file we configure the following &ldquo;register&rdquo; and &ldquo;login&rdquo; actions:</p>
+
+<pre><code class="language-xml">&lt;!-- login.xml --&gt;
+&lt;action type=&quot;register,login&quot;&gt;
+    &lt;!-- we need database for persistence --&gt;
+    {{ template &quot;db.xml&quot; . }}
+    &lt;!-- use SQL database for data persistence--&gt;
+    &lt;sql-auth/&gt;
+    &lt;!--
+    Check password, taking user name and password from the user request data
+    (&quot;data.payload.user&quot; and &quot;data.payload.password&quot; paths accordingly).
+    Requested operation is found in the variable, specified by the &quot;type&quot; attribute
+    (here it is &quot;data.type&quot;), an attribute &quot;to&quot; specifies a namespace path for
+    authentication results.
+    --&gt;
+    &lt;auth user=&quot;data.payload.user&quot; password=&quot;data.payload.password&quot; type=&quot;data.type&quot; to=&quot;auth&quot;&gt;
+        &lt;!-- components, executed after user password was checked --&gt;
+        &lt;session&gt;
+            &lt;!--
+            We start building token, which will be returned to the user.
+            In this example, as a first step we select user role from user_data table
+            --&gt;
+            &lt;select-row sql=&quot;select role from user_data where id = ?&quot; to=&quot;token&quot;&gt;
+                &lt;!-- default value, used if no value was found --&gt;
+                &lt;default&gt;{&quot;role&quot;:&quot;user&quot;}&lt;/default&gt;
+                &lt;params&gt;
+                    &lt;param path=&quot;auth.user&quot;/&gt;
+                &lt;/params&gt;
+                &lt;fields&gt;
+                    &lt;field path=&quot;role&quot; type=&quot;string&quot;/&gt;
+                &lt;/fields&gt;
+            &lt;/select-row&gt;
+            &lt;!-- add a user name to the token --&gt;
+            &lt;copy from=&quot;auth.user&quot; to=&quot;token.user&quot;/&gt;
+            &lt;!-- print the token to debug --&gt;
+            &lt;print path=&quot;token&quot;/&gt;
+            &lt;!--
+            sign using JWT keys found in &quot;keys&quot; directory,
+            generate new keys if no keys found
+            --&gt;
+            &lt;jwt dir=&quot;keys&quot; generate=&quot;true&quot;&gt;
+                &lt;!-- public key (to parse JWT token ) --&gt;
+                &lt;public file=&quot;jwt.pub&quot;/&gt;
+                &lt;!-- private key (to sign JWT token ) --&gt;
+                &lt;private file=&quot;jwt.pri&quot;/&gt;
+                &lt;!--
+                sign &quot;token&quot; object and place generated JWT
+                to &quot;reply.token&quot; path
+                --&gt;
+                &lt;sign path=&quot;token&quot; to=&quot;reply.token&quot;/&gt;
+            &lt;/jwt&gt;
+        &lt;/session&gt;
+        &lt;!-- some error --&gt;
+        &lt;error&gt;
+            &lt;!--
+            an authentication report
+            is copied to the &quot;reply&quot; variable
+            --&gt;
+            &lt;copy from=&quot;auth&quot; to=&quot;reply&quot;/&gt;
+            &lt;!-- print user request data to debug the problem --&gt;
+            &lt;print path=&quot;data&quot;/&gt;
+        &lt;/error&gt;
+    &lt;/auth&gt;
+&lt;/action&gt;
+</code></pre>
+
+<p>These actions are configured using <code>&lt;auth&gt;</code> component which requires SQL database
+for persistence (<code>&lt;sql-auth/&gt;</code> component and database initialization). This component
+is configured to take user name and password, and check them against values, stored
+in database (in case of user registration, component just checks user existence
+and saves user details to database). When passwords and user names match, a <code>&lt;session&gt;</code>
+section is executed, otherwise an <code>&lt;error&gt;</code> section is invoked.</p>
+
+<p>In case of error, we just copy authentication results to reply message, which is sent
+back to user. In case of success we build a token object, which is signed and sent
+to user. Content of the token could be application specific. For our example, the token
+contains user login name and &ldquo;role&rdquo; field which is populated from &ldquo;user_data&rdquo; table
+with &ldquo;user&rdquo; value default.</p>
+
+<p>Before trying login actions, we first need to update our database scheme, creating
+required <code>AUTH</code> table and our application specific <code>USER_DATA</code> table. This could
+be accomplished with the help of <code>auth-scheme</code> target (defined in &ldquo;auth-scheme.xml&rdquo;
+configuration file).</p>
+
+<p>When user authentication service is finished, we can create a separate endpoint for
+requests, which need to check user permissions.</p>
+
+<pre><code class="language-xml">&lt;!-- our protected API --&gt;
+&lt;endpoint path=&quot;/api/private&quot;&gt;
+    &lt;http-handler action=&quot;data.type&quot;&gt;
+        &lt;!--
+        Components inside &lt;before&gt; section are executed before any other
+        actions. If any component inside &lt;before&gt; section populates
+        &quot;reply&quot; variable no further actions are invoked. This makes &lt;before&gt;
+        section an ideal place to check user access rights
+        --&gt;
+        &lt;before&gt;
+            &lt;!-- we parse JWT token and do common checks here --&gt;
+            {{ template &quot;authentication.xml&quot; . }}
+        &lt;/before&gt;
+        &lt;!-- extract JSON object in a &quot;data&quot; form value and put it into &quot;data&quot; variable  --&gt;
+        &lt;request form-value=&quot;data&quot; to=&quot;data&quot; type=&quot;json&quot;/&gt;
+        &lt;!-- after action was executed we look for a value in a &quot;reply&quot; path,
+        to serialize it and sent back as a reply.
+        --&gt;
+        &lt;response path=&quot;reply&quot;/&gt;
+        &lt;!-- this is &quot;test&quot; action for our private API endpoint  --&gt;
+        &lt;action type=&quot;test&quot;&gt;
+            &lt;!-- we simply print the previously parsed JWT token and request payload --&gt;
+            &lt;print path=&quot;token&quot;/&gt;
+            &lt;print path=&quot;data.payload&quot;/&gt;
+            &lt;!-- and echo the payload value back --&gt;
+            &lt;copy from=&quot;data.payload&quot; to=&quot;reply&quot;/&gt;
+        &lt;/action&gt;
+    &lt;/http-handler&gt;
+&lt;/endpoint&gt;
+</code></pre>
+
+<p>To parse JWT tokens and check user rights, we use <code>&lt;before&gt;</code> section of <code>&lt;http-handler&gt;</code>.
+This section is particularly good for tasks like this, because if the <code>&lt;response&gt;</code>
+&ldquo;reply&rdquo; variable is populated by any component in this section,
+no further actions are executed, and just &ldquo;reply&rdquo; is sent back to the user.</p>
+
+<p>To actually configure user rights checks we may create a separate &ldquo;authentication.xml&rdquo;
+file containing the following configuration:</p>
+
+<pre><code class="language-xml">&lt;!--
+Parse a JWT token, for which we need only a public key.
+The key could be found in the &quot;keys&quot; directory. It should not be generated here.
+--&gt;
+&lt;jwt dir=&quot;keys&quot; generate=&quot;false&quot;&gt;
+    &lt;!-- file containing public key --&gt;
+    &lt;public file=&quot;jwt.pub&quot;/&gt;
+    &lt;!-- parse the string which could be found in a &quot;token&quot; field of the user request --&gt;
+    &lt;parse path=&quot;data.token&quot; to=&quot;token&quot;&gt;
+        &lt;!-- in case of any error, we may just return a JSON object with an error description --&gt;
+        &lt;error&gt;
+            &lt;json&gt;{&quot;reply&quot;:{&quot;error&quot;:&quot;not authenticated&quot;}}&lt;/json&gt;
+        &lt;/error&gt;
+    &lt;/parse&gt;
+&lt;/jwt&gt;
+</code></pre>
+
+<p>A <code>&lt;jwt&gt;</code> component can parse tokens, found in user requests thus making token data
+available to all endpoint actions. As you remember our token contains user ID and &ldquo;role&rdquo; data.
+In case no token is available or if it expires, the error reply is sent. To see request
+data and tokens our private endpoint contains &ldquo;test&rdquo; action, which just prints tokens and
+request payloads echoing requests back to the user.</p>
+
+<p>To easily check our server API functions, &ldquo;test.html&rdquo; file includes simple API
+playground: a form which allows you to select an API endpoint (&ldquo;/api/public/&rdquo;, &ldquo;/api/private/&rdquo;, etc),
+user credentials (user name\password), JWT token (populated after login),
+payload (as s JSON) and action.</p>
+
+<p>Using this playground someone may send different API requests: first to register
+a new user (on &ldquo;/api/public&rdquo; endpoint), then to login with the same credentials,
+then to send &ldquo;test&rdquo; requests to different API endpoints with different payloads.
+HTML page doesn&rsquo;t check for presence of the selected actions on the selected
+endpoints but still provides pretty powerful and easily expandable tool to test
+the server functionality.</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

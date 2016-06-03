@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>SQL Databases</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_sql">SQL Databases</h1>
+
+
+<p>
+	Commands to execute SQL queries.
+</p>
+
+
+
+
+
+
+<h3 id=db>&lt;db></h3>
+
+
+
+
+<p> General purpose SQL execution command.</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- Initializes SQL driver --&gt;
+&lt;db driver=&#34;mysql&#34; dataSource=&#34;root:root@/test&#34;/&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>driver</i>
+
+ a database type ("mysql" for MySQL, "pq" for PostgreSQL, and "mssql" for Microsoft SQL)
+
+
+</li>
+
+
+<li><i>dataSource</i>
+
+ configure a data source
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=last-insert-id>&lt;last-insert-id></h3>
+
+
+
+
+<p> returns id of last inserted row</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=rollback>&lt;rollback></h3>
+
+
+
+
+<p> Cancel current  SQL transaction</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=sql>&lt;sql></h3>
+
+
+
+
+<p> General purpose SQL execution command.</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- database setup --&gt;
+    {{template &#34;db.xml&#34; .}}
+
+    &lt;!-- scheme definition statement  --&gt;
+    &lt;sql&gt;
+        CREATE TABLE IF NOT EXISTS example_sql (
+          ID INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+          ISBN13 VARCHAR(13) NOT NULL,
+          PRICE DOUBLE NOT NULL DEFAULT &#39;0&#39;,
+          PRIMARY KEY (ID)
+        )
+        ENGINE=InnoDB;
+    &lt;/sql&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=tx>&lt;tx></h3>
+
+
+
+
+<p> Run SQL statements in transaction</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- database setup --&gt;
+    {{template &#34;db.xml&#34; .}}
+
+	&lt;!-- insert new records from an array of objects --&gt;
+	&lt;tx&gt;
+		&lt;update-many sql=&#34;insert into example_sql (isbn13,price) values (?,?)&#34;&gt;
+	        &lt;!-- take an array of objects from the &#34;data&#34; namespace path -&gt;
+	        &lt;params path=&#34;data&#34;&gt;
+	            &lt;!-- teke &#34;isbn&#34; property as the first query parameter --&gt;
+	            &lt;param path=&#34;isbn&#34;/&gt;
+	            &lt;!-- take &#34;price&#34; property --&gt;
+	            &lt;param path=&#34;price&#34;/&gt;
+	        &lt;/params&gt;
+	    &lt;/update-many&gt;
+	&lt;/tx&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=update|update-many|select|select-row>&lt;update|update-many|select|select-row></h3>
+
+
+
+
+<p> Runs parameterized SQL queries. Use an &#34;update-many&#34; tag</p>
+
+
+
+<p> to insert/update multiple database records:</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- database setup --&gt;
+    {{template &#34;db.xml&#34; .}}
+
+	&lt;!-- insert new records from an array of objects --&gt;
+	&lt;update-many sql=&#34;insert into example_sql (isbn13,price) values (?,?)&#34;&gt;
+        &lt;!-- take an array of objects from the &#34;data&#34; namespace path -&gt;
+        &lt;params path=&#34;data&#34;&gt;
+            &lt;!-- teke &#34;isbn&#34; property as the first query parameter --&gt;
+            &lt;param path=&#34;isbn&#34;/&gt;
+            &lt;!-- take &#34;price&#34; property --&gt;
+            &lt;param path=&#34;price&#34;/&gt;
+        &lt;/params&gt;
+    &lt;/update-many&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+<p> Use &lt;select&gt; to select database table records</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- database setup --&gt;
+    {{template &#34;db.xml&#34; .}}
+
+	&lt;!-- insert new records from an array of objects --&gt;
+	&lt;select sql=&#34;select into example_sql (isbn13,price) values (?,?)&#34; to=&#34;data&#34;&gt;
+        &lt;!-- describe database columns --&gt;
+        &lt;fields&gt;
+            &lt;!-- the first column - &#34;isbn&#34; is a string --&gt;
+            &lt;field name=&#34;isbn&#34; type=&#34;string&#34;/&gt;
+            &lt;!-- and the second, &#34;price&#34; column has a float data type --&gt;
+            &lt;field name=&#34;price&#34; type=&#34;float&#34;/&gt;
+        &lt;/fields&gt;
+    &lt;/select&gt;
+	&lt;!-- print selected values --&gt;
+	&lt;print path=&#34;data&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>default</i>
+
+ a default value JSON object to use if SQL query returns no rows (e.g.
+
+ {"price":10})
+
+
+</li>
+
+
+<li><i>fields</i>
+
+
+
+
+
+
+<p> fields in rows returned by an SQL query</p>
+
+
+
+
+<ul>
+
+<li><i>field</i>
+
+
+
+
+
+
+
+<ul>
+
+<li><i>type</i>
+
+ a data type ("int", "float", "string")
+
+
+</li>
+
+
+<li><i>name</i>
+
+ a property name
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>params</i>
+
+
+
+
+
+
+<p> parameters of the SQL query</p>
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path of a query parameter
+
+
+</li>
+
+
+<li><i>param</i>
+
+
+
+
+
+
+
+<ul>
+
+<li><i>type</i>
+
+ a data type ("int", "float", "string")
+
+
+</li>
+
+
+<li><i>path</i>
+
+ a namespace path of a parameter (relative to the parameter object)
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+<li><i>sql</i>
+
+ an SQL statement
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path to write SQL query results
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

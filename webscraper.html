@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Webscraping.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>Webscraping</h1>
+
+<p>After pages of interest were harvested using <code>&lt;harvester&gt;</code> they could be parsed
+and data could be extracted
+using a <code>&lt;scraper&gt;</code> component.<br />
+The <code>&lt;scraper&gt;</code> component builds HTML DOM tree and allows us to use standard CSS selectors
+to reference HTML elements containing data we are interested in. Applying a sequence of filters
+we can clean/format selected content.</p>
+
+<p>When configuring web scraper you may find web browser built in developer tools very
+helpful (press Ctrl-Shift-I in your Firefox or Chrome), but not required.
+As an example we consider how to extract pricing information from already harvested
+ pages with Amazon listings.</p>
+
+<p>First, we create <em>scraper</em> target with the following configuration:</p>
+
+<pre><code class="language-xml">&lt;!-- scraper target --&gt;
+&lt;!-- we take an HTML string of the page, located in &quot;body&quot; variable and save our
+    results into a &quot;listing&quot; property of &quot;item&quot; variable
+ --&gt;
+&lt;scraper path=&quot;body&quot; to=&quot;item.listing&quot;&gt;
+    &lt;!-- take the  DOM of whole HTML page (selector=&quot;html&quot; - to match &lt;html&gt; tag
+        and first=&quot;true&quot; - to take the first match found
+        are both unnecessary here but we would not like to change configuration structure
+        when we start modifying it later)
+    --&gt;
+    &lt;property name=&quot;offer&quot; selector=&quot;html&quot; first=&quot;true&quot;&gt;
+        &lt;!-- a pretty formatted HTML string--&gt;
+        &lt;html/&gt;
+    &lt;/property&gt;
+&lt;/scraper&gt;
+</code></pre>
+
+<p>Earlier we created targets to read CSV file with ISBN of two books, generated URLs and harvested pages, storing
+information for each book in a &ldquo;data&rdquo; array.
+For convenience, we now create a simple target to print listings and URL for each of &ldquo;data&rdquo;
+array items:</p>
+
+<pre><code class="language-xml">&lt;!-- print-listings target --&gt;
+&lt;each path=&quot;data&quot;&gt;
+    &lt;print path=&quot;url&quot;/&gt;
+    &lt;print path=&quot;listing&quot; max=&quot;-1&quot;/&gt;
+&lt;/each&gt;
+</code></pre>
+
+<p>We may test it running <code>xpricer -config getting-started.yaml -run &quot;scraper=scraper,csv-read,amazon-listings-url,harvest,print-listings&quot;</code> (we assigned
+our newly created scraper to the &ldquo;scraper&rdquo; variable, invoked by harvester, see <code>harvester.xml</code> for details).
+But as the list of targets became too long we first create shortcut for
+<code>scraper=scraper,csv-read,amazon-listings-url,harvest</code> as a <code>scrape-listings</code>
+target. Now finally <code>xpricer -config getting-started.yaml -run &quot;scrape-listings,print-listings&quot;</code>
+command should give us lengthy output, containing content of
+HTML pages. For convenience you may wish to redirect it to temporary file. Studying
+this output we may find that offers from different Amazon sellers are located inside HTML
+blocks with CSS class &ldquo;olpOffer&rdquo;. If we change <code>selector=&quot;html&quot;</code> to <code>selector=&quot;.olpOffer&quot;</code> (when selecting by
+class name, prefix a CSS class name with dot sign <code>.</code>) we may print an HTML of the first offer.</p>
+
+<p>Examining HTML structure of one offer we may find how to extract its distinct properties. For example we may notice
+that the price is located inside HTML element with a class name &ldquo;olpOfferPrice&rdquo;. Adding sub-property
+with <code>selector=&quot;.olpOfferPrice&quot;</code> we modify our scraper as following:</p>
+
+<pre><code class="language-xml">&lt;!-- scraper target --&gt;
+&lt;scraper path=&quot;body&quot; to=&quot;item.listing&quot;&gt;
+    &lt;property name=&quot;offer&quot; selector=&quot;.olpOffer&quot; first=&quot;true&quot;&gt;
+        &lt;html/&gt;
+        &lt;!-- select HTML element containing price information using &quot;olpOfferPrice&quot; CSS class selector --&gt;
+        &lt;property name=&quot;price&quot; selector=&quot;.olpOfferPrice&quot;&gt;
+            &lt;html/&gt;
+        &lt;/property&gt;
+    &lt;/property&gt;
+&lt;/scraper&gt;
+</code></pre>
+
+<p>The output may contain something like <code>price= $34.85</code>. This looks close,
+but still not exactly the answer we are looking for: in the end of the day we would like
+to get our price as a float point number. This is a common situation and it is solved using filters.
+To extract exactly the data needed and insure correct data format we apply appropriate filters.
+In our case just substituting <code>&lt;html/&gt;</code> filter for
+<code>&lt;number/&gt;</code> gives the correct answer.</p>
+
+<p>In a similar fashion other properties could be extracted:</p>
+
+<pre><code class="language-xml">&lt;!-- scraper target --&gt;
+&lt;!-- parse a page contains distinct HTML blocks with offers from different Amazon sellers.
+Select these blocks and save extracted information into an &quot;offers&quot; array.
+--&gt;
+&lt;scraper path=&quot;body&quot; to=&quot;item.listing&quot;&gt;
+    &lt;!-- &quot;name&quot; attribute was omitted as we don't need HTML text any more--&gt;
+    &lt;property selector=&quot;.olpOffer&quot; first=&quot;true&quot;&gt;
+        &lt;property name=&quot;supersaver&quot; selector=&quot;.supersaver&quot;&gt;
+            &lt;!-- true if selector matches any HTML element --&gt;
+            &lt;exists/&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;price&quot; selector=&quot;.olpOfferPrice&quot;&gt;
+            &lt;!-- find and extract floating point number (using regular expression matching sequence of digits and decimal point)  --&gt;
+            &lt;number/&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;shippingPrice&quot; selector=&quot;.olpShippingPrice&quot;&gt;
+            &lt;number/&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;sellerName&quot; selector=&quot;.olpSellerName&quot;&gt;
+            &lt;!-- leading and trailing white spaces are removed --&gt;
+            &lt;trim/&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;condition&quot; selector=&quot;.olpCondition&quot;&gt;
+            &lt;trim/&gt;
+            &lt;!-- remove white spaces around dashes (regular expression pattern matches dash
+            with leading and trailing spaces and replaces this sequence with &quot;-&quot;),
+            e.g. &quot;Used - Like New&quot; becomes &quot;Used-Like New&quot;
+            --&gt;
+            &lt;replace pattern=&quot;\s*-\s*&quot; replacement=&quot;-&quot; /&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;rating&quot; selector=&quot;.olpSellerColumn p a&quot;&gt;
+            &lt;!-- extract integer --&gt;
+            &lt;int/&gt;
+        &lt;/property&gt;
+        &lt;property name=&quot;feedback&quot; selector=&quot;.olpSellerColumn p&quot;&gt;
+            &lt;!-- feedback is a long number in brackets). extarct it by fist finding
+            an opening bracket followed by digits and comma --&gt;
+            &lt;regex pattern=&quot;\([0-9,]+&quot; /&gt;
+            &lt;!-- then remove opening bracket and comma (by default replacement=&quot;&quot;) --&gt;
+            &lt;replace pattern=&quot;[(,]&quot;/&gt;
+            &lt;int/&gt;
+        &lt;/property&gt;
+    &lt;/property&gt;
+&lt;/scraper&gt;
+</code></pre>
+
+<p>This should give us something like <code>price=34.85 shippingPrice=3.99 sellerName=Serendipity UnLtd condition=Used-Very Good rating=97 feedback=22334 supersaver=false</code>.
+Now we only need to modify our configuration to extract all the offers on the page.
+For this we just need to replace <code>&lt;property selector=&quot;.olpOffer&quot; first=&quot;true&quot;&gt;</code> with
+<code>&lt;each name=&quot;offers&quot; selector=&quot;.olpOffer&quot;&gt;</code> which creates an array of objects &ldquo;offers&rdquo;.</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

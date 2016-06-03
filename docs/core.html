@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Core components</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_core">Core components</h1>
+
+
+<p>
+	General purpose components
+</p>
+
+
+
+
+
+
+<h3 id=all>&lt;all></h3>
+
+
+
+
+<p>The container component to execute multiple component sequentially.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- define variable total=10 and then print it --&gt;
+    &lt;json&gt;{&#34;total&#34;:10}&lt;/json&gt;
+    &lt;print path=&#34;total&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=command>&lt;command></h3>
+
+
+
+
+<p> Execute command saved in a path given</p>
+
+
+
+<pre><code class="language-xml">&lt;comand path=&#34;test&#34;/&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a path to a saved command
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=command-save>&lt;command-save></h3>
+
+
+
+
+<p> Saves commands</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- saves under &#34;settings&#34; name --&gt;
+&lt;command-save to=&#34;settings&#34;&gt;
+	&lt;!-- sets &#34;total&#34; to be equal 4 --&gt;
+	&lt;json&gt;{&#34;total&#34;:4}&lt;/json&gt;
+&lt;/each&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>to</i>
+
+ a path to save this command to
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=copy>&lt;copy></h3>
+
+
+
+
+<p>Component to copy/merge values from one namespace path to another.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;copy from=&#34;source&#34; to=&#34;destination&#34;/&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>from</i>
+
+ a source value path
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a destination path
+
+
+</li>
+
+
+<li><i>merge</i>
+
+ a boolean flag to merge data (an old value is overwritten by default)
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=each>&lt;each></h3>
+
+
+
+
+<p> Iterate over an array of objects. Children reference current object properties.</p>
+
+
+
+<pre><code class="language-xml">&lt;each path=&#34;data&#34;&gt;
+	&lt;print/&gt;
+&lt;/each&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a path to an array of objects
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=exe>&lt;exe></h3>
+
+
+
+
+<p> Runs external process.</p>
+
+
+
+<pre><code class="language-xml">&lt;exe command=&#34;program&#34;&gt;
+	&lt;env&gt;ENV1=value1&lt;/env&gt;
+	&lt;env&gt;ENV2=value2&lt;/env&gt;
+	&lt;arg&gt;-command1&lt;/arg&gt;
+	&lt;arg&gt;test&lt;/arg&gt;
+&lt;/exe&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>print-stdout</i>
+
+ print program standard output
+
+
+</li>
+
+
+<li><i>dir</i>
+
+ a directory where the process will be invoked
+
+
+</li>
+
+
+<li><i>command</i>
+
+ a name of the program to execute
+
+
+</li>
+
+
+<li><i>arg</i>
+
+
+
+
+
+
+<p>
+    specify program arguments
+</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+</li>
+
+
+<li><i>env</i>
+
+
+
+
+
+
+<p>
+    specify environment variables of the process invoked
+</p>
+
+
+
+
+<ul>
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=if>&lt;if></h3>
+
+
+
+
+<p>Component to define namespace variables using  JSON format.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;if e=&#34;price &lt; 0.1 || num == 0&#34;&gt;
+    &lt;!-- executed when expression &#34;price &lt; 0.1 || num == 0&#34; evaluates to true --&gt;
+	&lt;then&gt;
+		&lt;json&gt;{&#34;status&#34;:&#34;error&#34;}&lt;/json&gt;
+	&lt;/then&gt;
+    &lt;!-- otherwise check that &#34;last.total&#34; path contains any value --&gt;
+	&lt;elseif defined=&#34;last.total&#34;&gt;
+		&lt;then&gt;
+			&lt;json&gt;{&#34;status&#34;:&#34;ready&#34;}&lt;/json&gt;
+		&lt;/then&gt;
+	&lt;/elseif&gt;
+    &lt;!-- otherwise, if no elseif condition was met this block is executed--&gt;
+    &lt;else&gt;
+        &lt;json&gt;{&#34;status&#34;:&#34;waiting&#34;}&lt;/json&gt;
+    &lt;/else&gt;
+&lt;/if&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>e</i>
+
+ boolean expression
+
+
+</li>
+
+
+<li><i>defined</i>
+
+ a namespace path. Condition is true when a namespace variable was defined
+
+
+</li>
+
+
+<li><i>then</i>
+
+ a components container, executed when all conditions are met
+
+
+</li>
+
+
+<li><i>else</i>
+
+ a components container, executed when condition is not met
+
+
+</li>
+
+
+<li><i>elseif</i>
+
+ other if statement
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=json>&lt;json></h3>
+
+
+
+
+<p>Component to define namespace variables using using JSON format.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- define variable data.total=10 and then print it --&gt;
+    &lt;json path=&#34;data&#34;&gt;{&#34;total&#34;:10}&lt;/json&gt;
+    &lt;print path=&#34;data.total&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ path to assign variable to overriding existing values
+
+
+</li>
+
+
+<li><i>merge</i>
+
+ path to the variable, JSON object is merged
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=print>&lt;print></h3>
+
+
+
+
+<p>Component to print namespace variables.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- define a new variable total and then print it --&gt;
+    &lt;json&gt;{&#34;total&#34;:10}&lt;/json&gt;
+    &lt;print path=&#34;total&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to print
+
+
+</li>
+
+
+<li><i>max</i>
+
+ a maximum number of string characters to be printed
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=sprintf>&lt;sprintf></h3>
+
+
+
+
+<p> Formats according to a format specifier and returns the resulting string.</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- create and print formated string, including id and name fields --&gt;
+	&lt;sprintf path=&#34;id,name&#34; format=&#34;id:%d, name:%s&#34; to=&#34;str&#34;/&gt;
+	&lt;print path=&#34;str&#34;&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>to</i>
+
+ a namespace path of the resulting string
+
+
+</li>
+
+
+<li><i>path</i>
+
+ a comma separated list of namespace paths (creates an array of used variables)
+
+
+</li>
+
+
+<li><i>format</i>
+
+ a format specifier
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=try>&lt;try></h3>
+
+
+
+
+<p> Component to catch execution errors.</p>
+
+
+
+<pre><code class="language-xml">&lt;try&gt;
+    &lt;block&gt;
+        &lt;comp1/&gt;
+        &lt;comp2/&gt;
+    &lt;/block&gt;
+    &lt;catch&gt;
+        &lt;comp3/&gt;
+    &lt;/catch&gt;
+    &lt;finally&gt;
+        &lt;comp4/&gt;
+    &lt;/finally&gt;
+&lt;/try&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>block</i>
+
+ a block of components on which capture errors
+
+
+</li>
+
+
+<li><i>catch</i>
+
+ a block of components which are executed in case of any error
+
+
+</li>
+
+
+<li><i>finally</i>
+
+ a block of components which are executed in any case (whether or not there was any error)
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

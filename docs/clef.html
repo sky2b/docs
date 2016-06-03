@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Scripting</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_clef">Scripting</h1>
+
+
+<p>
+	Components to execute built in scripting language Clef. The goal is to provide
+    means to evaluate simple
+    mathematical expressions and control statements while making syntax similar to the
+    syntax of a Google Go language. In contrast to GO, Clef is a dynamically-typed language.
+    To simplify common scripting tasks,
+    it also has &#34;matches regular expression&#34; operator &#34;~&#34; (and opposite &#34;!~&#34;) and follows Javascript
+    conventions when converting values to booleans (0, empty string and nil are treated
+    as false and all other values as true).
+</p>
+
+
+
+
+
+
+<h3 id=clef>&lt;clef></h3>
+
+
+
+
+<p>
+Execute scripts in a built-in scripting language - Clef.
+Scripts have access to all namespace variables. You may assign
+values to new properties and you can use common control statements. There is
+only one global scope,
+associated with the current namespace.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- iterate over &#34;data&#34; array  --&gt;
+&lt;each path=&#34;data&#34;&gt;
+    &lt;!-- conditionally change the value of &#34;num&#34; property --&gt;
+    &lt;clef&gt;
+        if rating &gt; 1000 &amp;&amp; number &lt; 4 {
+            number &#43;= 2
+        }
+    &lt;/clef&gt;
+&lt;/each&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

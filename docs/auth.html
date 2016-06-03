@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>User authentication</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_auth">User authentication</h1>
+
+
+<p>
+	Components for user authentication.
+</p>
+
+
+
+
+
+
+<h3 id=auth>&lt;auth></h3>
+
+
+
+
+<p> Register or login user. An &lt;auth&gt; component is responsible to
+    register/check user credentials. A &lt;sql-auth/&gt; component is required to store
+    user credentials in database (you also need &lt;db&gt; for database connection
+    and proper database scheme). This component is usually utilized with &lt;jwt/&gt; component,
+    which generates JWT token for
+    later use with protected API endpoints.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;action type=&#34;register,login&#34;&gt;
+    &lt;!-- we need database for persistence --&gt;
+    {{ template &#34;db.xml&#34; . }}
+    &lt;!-- use SQL database for data persistence--&gt;
+    &lt;sql-auth/&gt;
+    &lt;!--
+    Check password, taking user name and password from the user request data
+    (&#34;data.payload.user&#34; and &#34;data.payload.password&#34; paths accordingly).
+    Requested operation is found in the variable, specified by the &#34;type&#34; attribute
+    (here it is &#34;data.type&#34;), an attribute &#34;to&#34; specifies a namespace path for
+    authentication results.
+    --&gt;
+    &lt;auth user=&#34;data.payload.user&#34; password=&#34;data.payload.password&#34; type=&#34;data.type&#34; to=&#34;auth&#34;&gt;
+        &lt;!-- components, executed after user password was checked --&gt;
+        &lt;session&gt;
+            &lt;!--
+            We start building token, which will be returned to the user.
+            In this example, as a first step we select user role from user_data table
+            --&gt;
+            &lt;select-row sql=&#34;select role from user_data where id = ?&#34; to=&#34;token&#34;&gt;
+                &lt;!-- default value, used if no value was found --&gt;
+                &lt;default&gt;{&#34;role&#34;:&#34;user&#34;}&lt;/default&gt;
+                &lt;params&gt;
+                    &lt;param path=&#34;auth.user&#34;/&gt;
+                &lt;/params&gt;
+                &lt;fields&gt;
+                    &lt;field path=&#34;role&#34; type=&#34;string&#34;/&gt;
+                &lt;/fields&gt;
+            &lt;/select-row&gt;
+            &lt;!-- add a user name to the token --&gt;
+            &lt;copy from=&#34;auth.user&#34; to=&#34;token.user&#34;/&gt;
+            &lt;!-- print the token to debug --&gt;
+            &lt;print path=&#34;token&#34;/&gt;
+            &lt;!--
+            sign using JWT keys found in &#34;keys&#34; directory,
+            generate new keys if no keys found
+            --&gt;
+            &lt;jwt dir=&#34;keys&#34; generate=&#34;true&#34;&gt;
+                &lt;!-- public key (to parse JWT token ) --&gt;
+                &lt;public file=&#34;jwt.pub&#34;/&gt;
+                &lt;!-- private key (to sign JWT token ) --&gt;
+                &lt;private file=&#34;jwt.pri&#34;/&gt;
+                &lt;!--
+                sign &#34;token&#34; object and place generated JWT
+                to &#34;reply.token&#34; path
+                --&gt;
+                &lt;sign path=&#34;token&#34; to=&#34;reply.token&#34;/&gt;
+            &lt;/jwt&gt;
+        &lt;/session&gt;
+        &lt;!-- some error --&gt;
+        &lt;error&gt;
+            &lt;!--
+            an authentication report
+            is copied to the &#34;reply&#34; variable
+            --&gt;
+            &lt;copy from=&#34;auth&#34; to=&#34;reply&#34;/&gt;
+            &lt;!-- print user request data to debug the problem --&gt;
+            &lt;print path=&#34;data&#34;/&gt;
+        &lt;/error&gt;
+    &lt;/auth&gt;
+&lt;/action&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>to</i>
+
+ a namespace variable for results of authentication
+
+
+</li>
+
+
+<li><i>type</i>
+
+ a namespace path to action name
+
+
+</li>
+
+
+<li><i>user</i>
+
+ a namespace path to user name
+
+
+</li>
+
+
+<li><i>password</i>
+
+ a namespace path to password
+
+
+</li>
+
+
+<li><i>remind</i>
+
+ a container for "remind" action section
+
+
+</li>
+
+
+<li><i>session</i>
+
+ a container executed in case of successful login or register actions
+
+
+</li>
+
+
+<li><i>drop</i>
+
+ a container for "drop" action section
+
+
+</li>
+
+
+<li><i>error</i>
+
+ a container to execute in case of errors
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

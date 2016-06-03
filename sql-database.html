@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>SQL database.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>SQL Database</h1>
+
+<p>SQL databases are widely used to store and process various data. AddPricer could be used
+to simplify all database related tasks: both to create database backed API services
+or to manage and support SQL databases. Its components could be used for querying
+and searching, for import\export and schema updates.</p>
+
+<p>The first, required database component - <code>&lt;db&gt;</code> initializes SQL driver. It has <em>driver</em>
+attribute which is
+a database type (&ldquo;mysql&rdquo; for MySQL, &ldquo;pq&rdquo; for PostgreSQL, and &ldquo;mssql&rdquo; for Microsoft SQL)
+and dataSource attribute. For our further examples we will use
+<code>&lt;db driver=&quot;mysql&quot; dataSource=&quot;root:root@/test&quot;/&gt;</code> configuration which connects to
+local MySQL database as a root and selects a test database. You may change your
+settings accordingly
+in <em>db.xml</em> file in <em>getting-started</em> directory.</p>
+
+<p>First lets create table and import some data. To change database scheme we may
+wish to be able to execute arbitrary SQL statements and here there is a handy <code>&lt;sql&gt;</code> command:</p>
+
+<pre><code class="language-xml">&lt;!-- scheme target --&gt;
+&lt;all&gt;
+    &lt;!-- import database setup --&gt;
+    {{template &quot;db.xml&quot; .}}
+
+    &lt;!-- create table example_sql --&gt;
+    &lt;sql&gt;
+        CREATE TABLE IF NOT EXISTS example_sql (
+          ID INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+          ISBN13 VARCHAR(13) NOT NULL,
+          PRIMARY KEY (ID)
+        )
+        ENGINE=InnoDB;
+    &lt;/sql&gt;
+
+&lt;/all&gt;
+</code></pre>
+
+<p>After running <code>addgears -config getting-started.yaml -run scheme</code> we get SQL table created.
+Now running <code>addgears -config getting-started.yaml -run &quot;csv-read,populate&quot;</code>
+we can populate our database table with the data read using the <em>csv-read</em> target,
+which we previously used to read and print the content of a CSV file. The populate
+target is defined in the following configuration:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    {{ template &quot;db.xml&quot; . }}
+    &lt;!-- insert new records from an array of objects --&gt;
+    &lt;update-many sql=&quot;insert into example_sql (isbn13,price) values (?,?)&quot;&gt;
+        &lt;!-- take an array of objects from the &quot;data&quot; namespace path--&gt;
+        &lt;params path=&quot;data&quot;&gt;
+            &lt;!-- teke &quot;isbn&quot; property as the first query --&gt;
+            &lt;param path=&quot;isbn&quot;/&gt;
+            &lt;!-- take &quot;price&quot; property --&gt;
+            &lt;param path=&quot;price&quot;/&gt;
+        &lt;/params&gt;
+    &lt;/update-many&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>This is a good example of how we can mix different targets (in this case &ldquo;csv-read&rdquo;
+plus &ldquo;populate&rdquo;) to get a new functionality. Now to import &ldquo;isbn&rdquo; and &ldquo;price&rdquo; into
+our table we may now just configure how to read data from a new source file.</p>
+
+<p>To select table rows we may use a <code>&lt;select&gt;</code> command which additionally requires
+a table fields description. For example to select and print all rows from the <em>example_sql</em> table
+we may write:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- database setup --&gt;
+    {{template &quot;db.xml&quot; .}}
+
+    &lt;!-- insert new records from an array of objects --&gt;
+    &lt;select sql=&quot;select isbn13, price from example_sql&quot; to=&quot;data&quot;&gt;
+        &lt;!-- describe database columns --&gt;
+        &lt;fields&gt;
+            &lt;!-- the first column - &quot;isbn&quot; is a string --&gt;
+            &lt;field name=&quot;isbn&quot; type=&quot;string&quot;/&gt;
+            &lt;!-- and the second, &quot;price&quot; column has a float data type --&gt;
+            &lt;field name=&quot;price&quot; type=&quot;float&quot;/&gt;
+        &lt;/fields&gt;
+    &lt;/select&gt;
+    &lt;!-- print selected values --&gt;
+    &lt;print path=&quot;data&quot;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>Which may produce something like:</p>
+
+<pre><code>[map[isbn:9780002258548 price:4] map[isbn:9780003704556 price:5]]
+</code></pre>
+
+<p>Again we may chain this target with some other target and, for example, save data
+to some CSV file (<code>addgears -config getting-started.yaml -run &quot;select,csv-write&quot;</code>).</p>
+
+<p>We may put multiple SQL statements into transaction using <code>&lt;tx&gt;</code> command:</p>
+
+<pre><code class="language-xml">&lt;all&gt;
+    {{ template &quot;db.xml&quot; . }}
+    &lt;!-- multiple updates in one transaction (all succeed or all fail) --&gt;
+    &lt;tx&gt;
+        &lt;!-- insert new records from an array of objects --&gt;
+        &lt;update-many sql=&quot;insert into example_sql (isbn13,price) values (?,?)&quot;&gt;
+            &lt;!-- take an array of objects from the &quot;data&quot; namespace path--&gt;
+            &lt;params path=&quot;data&quot;&gt;
+                &lt;!-- teke &quot;isbn&quot; property as the first query --&gt;
+                &lt;param path=&quot;isbn&quot;/&gt;
+                &lt;!-- take &quot;price&quot; property --&gt;
+                &lt;param path=&quot;price&quot;/&gt;
+            &lt;/params&gt;
+        &lt;/update-many&gt;
+    &lt;/tx&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>This will either insert all rows or none if any insertion fails. To cancel transaction
+use <code>&lt;rollback/&gt;</code>. To get id(s) of last inserted rows use <code>last-insert-id</code>.</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

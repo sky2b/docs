@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Web Crawler.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>HTML harvester</h1>
+
+<p>Sometimes you need to crawl Web pages and scrape some data from HTML. AddPricer
+comes with components for both data harvesting (pages acquisition) and web scraping
+(data extraction).</p>
+
+<p>We start with harvesting
+necessary pages with the help of <code>&lt;harvester&gt;</code> component, which supports page caching, proxies
+and anonymous crawling via Tor network.</p>
+
+<p>Harvesting is inherently asynchronous, error prone and time consuming operation.
+In contrast, extracting
+data even from thousand pages on modern hardware may take less then a second.
+For this reason often it makes sense to perform Web harvesting  as a separate, distinct
+data processing step, leaving HTML scraping for later. To enable such work separation
+successful requests could be cached for later
+reuse in configurable cache directory, so that after we harvest our HTML pages we can
+easily (re)process them later.</p>
+
+<p>As an example we consider harvesting listings from Amazon. Suppose we have
+a CSV file with ISBNs of books we wish to reprice, then, for each book we may
+generate URL of the page with offers from different Amazon sellers:</p>
+
+<pre><code class="language-xml">&lt;!-- amazon-listings-url target --&gt;
+&lt;all&gt;
+    &lt;!-- iterate over an array of objects found in a &quot;data&quot; path, generating an  URL property --&gt;
+    &lt;each path=&quot;data&quot;&gt;
+        &lt;!-- convert ISBN13 to ISBN10 --&gt;
+        &lt;isbn path=&quot;isbn&quot; to=&quot;isbn10&quot; type=&quot;10&quot;/&gt;
+        &lt;!-- generate the URL of Amazon book listings --&gt;
+        &lt;sprintf format=&quot;http://www.amazon.com/gp/offer-listing/%s/&quot; path=&quot;isbn10&quot; to=&quot;url&quot;/&gt;
+    &lt;/each&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>Now if we run <code>xpricer -config getting-started.yaml -run &quot;csv-read,amazon-listings-url&quot;</code>
+we generate URL for every ISBN. Now add a harvester:</p>
+
+<pre><code class="language-xml">&lt;!-- harvest target --&gt;
+&lt;all&gt;
+    &lt;!-- harvest pages for an array in a &quot;data&quot; variable --&gt;
+    &lt;harvester path=&quot;data&quot; direct=&quot;true&quot; cache=&quot;tmp&quot;&gt;
+        &lt;!-- log request results and make HTTP status code, current array item, HTML page body
+        and harvester namespace variables available in the following &lt;then&gt; block
+        --&gt;
+        &lt;results log=&quot;true&quot; code=&quot;code&quot; item=&quot;item&quot; body=&quot;body&quot; scope=&quot;scope&quot;/&gt;
+        &lt;then&gt;
+            &lt;!-- execute &quot;scraper&quot; command (if any) --&gt;
+            &lt;command path=&quot;scope.scraper&quot;/&gt;
+        &lt;/then&gt;
+    &lt;/harvester&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>The harvester operates on an array of objects - each with &ldquo;url&rdquo; property
+of the page to download. HTML pages are cached in &ldquo;tmp&rdquo; directory and
+<code>direct=&quot;true&quot;</code> specifies that harvester fetches pages from your computer,
+no proxies are used. After each page is downloaded, <code>&lt;then&gt;</code> block is executed.
+The <code>&lt;results&gt;</code> allows to configure logging, and variables available in the
+<code>&lt;then&gt;</code> block. Our configuration makes HTTP status code, array item,
+HTML page body and namespace available in &ldquo;code&rdquo;, &ldquo;item&rdquo;, &ldquo;body&rdquo; and &ldquo;scope&rdquo;
+variables. Our <code>&lt;then&gt;</code> block executes a &ldquo;scraper&rdquo; command (when defined) from
+a parent namespace. To test the configuration we can set &ldquo;scraper&rdquo; to be equal &ldquo;print&rdquo;
+target: <code>xpricer -config getting-started.yaml -run &quot;scraper=print,csv-read,amazon-listings-url,harvest&quot;</code>.
+Which should print all the information, available to the scraper.</p>
+
+<p>When downloading many pages we may wish use multiple proxies. A <code>&lt;harvester&gt;</code> could be configured
+to use proxies by <code>&lt;proxies&gt;</code> option (set direct=&ldquo;false&rdquo; to disallow direct requests):</p>
+
+<pre><code class="language-xml">&lt;!-- proxies-harvest target --&gt;
+&lt;all&gt;
+    &lt;harvester path=&quot;data&quot; direct=&quot;false&quot; cache=&quot;tmp&quot;&gt;
+        &lt;proxies config-file=&quot;data/proxies.json&quot;/&gt;
+        &lt;results log=&quot;true&quot; code=&quot;code&quot; item=&quot;item&quot; body=&quot;body&quot; scope=&quot;scope&quot;/&gt;
+        &lt;then&gt;
+            &lt;!-- execute &quot;scraper&quot; command (if any) --&gt;
+            &lt;command path=&quot;scope.scraper&quot;/&gt;
+        &lt;/then&gt;
+    &lt;/harvester&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>Proxies are listed in &ldquo;data/proxies.json&rdquo; file, which has the following structure:</p>
+
+<pre><code class="language-JavaScript">// JSON object with each property
+// being proxy configuration
+{
+    // an property names - proxy IDs
+    &quot;https://117.240.187.35:3128&quot;:{
+        &quot;address&quot;:&quot;https://117.240.187.35:3128&quot;, // proxy address
+        &quot;username&quot;:&quot;user name (if required)&quot;,
+        &quot;password&quot;:&quot;password (if required)&quot;,
+        &quot;timeout&quot;:5000, // timeout in milliseconds (optional)    
+        &quot;disabled&quot;:false // set to true if you don't like to use this proxy
+    }
+}
+</code></pre>
+
+<p>When you clean cache directory (executing &ldquo;clean&rdquo; target),
+try to run <code>xpricer -config getting-started.yaml -run &quot;scraper=print,csv-read,amazon-listings-url,harvest&quot;</code> command,
+with some luck you will get your pages harvested (although you may see some errors).
+An example proxies list in a file &ldquo;data/proxies.json&rdquo; contains list of free public
+proxies. Some of them could be not working and they are provided to illustrate proxies format only.
+Use Tor or private proxies instead. To automatically start Tor gateways on Linux, use
+<code>&lt;tor port=&quot;1894&quot; total=&quot;10&quot;/&gt;</code> option, specifying the beginning of a port range,
+and the number of Tor gateways needed.</p>
+
+<p>When HTML pages have been harvested nothing will hinder your next step:
+<a href="webscraper.html">data extraction</a>.</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+

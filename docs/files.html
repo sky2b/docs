@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>Filesystem</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="../css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href="../index.html"></a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<div class="section"><div class="container">
+<h1 id="module_files">Filesystem</h1>
+
+
+<p>
+	File and directory operations.
+</p>
+
+
+
+
+
+
+<h3 id=csv>&lt;csv></h3>
+
+
+
+
+<p> Read a CSV file. Content of the file is read as an array of objects. Any errors are
+reported to &#34;report&#34; variable. The report contains object with the following fields:
+&#34;total&#34; - total lines read, &#34;skipped&#34; - number of lines skipped, &#34;errors&#34; - array of objects
+describing the errors encountered (with &#34;line&#34;, &#34;column&#34; and &#34;message&#34; fields)
+
+/*
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- read a file, skipping the one line header --&gt;
+    &lt;csv file=&#34;data/example-prices.txt&#34; to=&#34;data&#34; skip=&#34;1&#34;&gt;
+        &lt;!-- the first column is isbn --&gt;
+        &lt;column type=&#34;string&#34; name=&#34;isbn&#34;/&gt;
+        &lt;!-- the second column contains price --&gt;
+        &lt;column type=&#34;float&#34; name=&#34;price&#34;/&gt;
+    &lt;/csv&gt;
+    &lt;!-- print the array of objects read --&gt;
+    &lt;print path=&#34;data&#34;/&gt;
+    &lt;!-- print an operation report --&gt;
+    &lt;print path=&#34;data-report&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to the variable containing a filename, used instead of a filename in a "file" attribute)
+
+
+</li>
+
+
+<li><i>file</i>
+
+ a filename or a glob pattern (turn on using a glob="true" attribute)
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path to save the file content to
+
+
+</li>
+
+
+<li><i>report</i>
+
+ a namespace path to the variable where operation results will be reported to. By default it is the value of attribute "to" plus "-report" suffix
+
+
+</li>
+
+
+<li><i>skip</i>
+
+ the first file lines skipped
+
+
+</li>
+
+
+<li><i>max</i>
+
+ the number of lines to read
+
+
+</li>
+
+
+<li><i>column</i>
+
+
+
+
+
+
+<p> Describes CSV file columns</p>
+
+
+
+
+<ul>
+
+<li><i>name</i>
+
+ a column name
+
+
+</li>
+
+
+<li><i>order</i>
+
+ an order of the column (specify if some columns are skipped)
+
+
+</li>
+
+
+<li><i>type</i>
+
+ a column data type, could be "int", "float", "string"
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=csv-write>&lt;csv-write></h3>
+
+
+
+
+<p> Write an array of objects to a CSV file. A new file is created, existing one is truncated.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	// define a namespace variable &#34;data&#34; containing an array of objects
+	&lt;json&gt;{
+		data:[
+			{&#34;id&#34;:1, &#34;price&#34;:1.1},
+			{&#34;id&#34;:2, &#34;price&#34;:2.1}
+		]
+	}&lt;/json&gt;
+    &lt;!-- write the array into a file, with a header coming first --&gt;
+    &lt;csv-write file=&#34;data/example-write-csv.txt&#34; path=&#34;data&#34; header=&#34;true&#34;&gt;
+        &lt;!-- the first column is id --&gt;
+        &lt;column name=&#34;id&#34;/&gt;
+        &lt;!-- the second column contains price --&gt;
+        &lt;column name=&#34;price&#34;/&gt;
+    &lt;/csv-write&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to the variable containing an array of objects we want to save
+
+
+</li>
+
+
+<li><i>file</i>
+
+ a filename or a glob pattern (turn on using a glob="true" attribute)
+
+
+</li>
+
+
+<li><i>header</i>
+
+ boolean attribute, if true the header is saved in the first line
+
+
+</li>
+
+
+<li><i>column</i>
+
+
+
+
+
+
+<p> Describes CSV file columns</p>
+
+
+
+
+<ul>
+
+<li><i>name</i>
+
+ the name of object property we want to save. Used as a header if no header attribute was provided
+
+
+</li>
+
+
+<li><i>header</i>
+
+ a column header (used when header attribute for the file writer is set to true)
+
+
+</li>
+
+
+<li><i>format</i>
+
+ an optional format pattern for this property,
+
+ e.g. "this is integer price value: %d" will print the comment and the integer value. See Go <a href="https://golang.org/pkg/fmt/">fmt package</a> for details
+
+
+</li>
+
+
+</ul>
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=dir-copy>&lt;dir-copy></h3>
+
+
+
+
+<p> Copy directories recursively
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- copy configuration files into subdirectory --&gt;
+	&lt;dir-copy to=&#34;data/example-write-dir-copy/sub&#34; from=&#34;getting-started&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>from</i>
+
+ a glob pattern of directories to copy
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a destination directory
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=file-move>&lt;file-move></h3>
+
+
+
+
+<p> Copy directories recursively
+</p>
+
+
+
+<pre><code class="language-xml">&lt;!-- copy configuration files into subdirectory --&gt;
+&lt;file-move to=&#34;data/example-write-dir-copy/sub&#34; from=&#34;getting-started/*&#34;/&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>from</i>
+
+ a glob pattern of entities to copy
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a destination directory
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=file-read>&lt;file-read></h3>
+
+
+
+
+<p> Read file content into namespace variable</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- read file &#34;data/example-prices.txt&#34; into &#34;content&#34; variable--&gt;
+    &lt;file-read type=&#34;text&#34; file=&#34;data/example-prices.txt&#34; to=&#34;content&#34;/&gt;
+    &lt;!-- print &#34;content&#34; variable--&gt;
+    &lt;print path=&#34;content&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to a filename, when given, is used instead of the filename in a "file" attribute
+
+
+</li>
+
+
+<li><i>file</i>
+
+ a filename or a glob pattern (turn on using a glob="true" attribute)
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path to save the file content to
+
+
+</li>
+
+
+<li><i>type</i>
+
+ content type, could be "text", "markdown", "template", "template-text", "json", "yaml".
+		Different types are preprocessed accordingly: "json" and "yaml" are read as objects, templates are parsed as Go templates,
+		"markdown" is converted to HTML
+
+
+
+</li>
+
+
+<li><i>glob</i>
+
+ a boolean flag, indicating that the filename is a <a href="https://en.wikipedia.org/wiki/Glob_(programming)">glob pattern</a>
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=file-write|file-append>&lt;file-write|file-append></h3>
+
+
+
+
+<p> Write/append to the file. If &lt;file-write&gt; is used, the file is created or truncated if exists,
+otherwise the content is appended
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- assign JSON object to the &#34;data&#34; variable --&gt;
+    &lt;json path=&#34;data&#34;&gt;{
+        &#34;field1&#34;: 1,
+        &#34;field2&#34; : true
+    }&lt;/json&gt;
+    &lt;!-- save the &#34;data&#34; variable to the &#34;data/example-write-file.txt&#34; file in YAML format --&gt;
+    &lt;file-write type=&#34;yaml&#34; file=&#34;data/example-write-file.txt&#34; to=&#34;content&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to the variable containing filename (which, when given, is used instead of the filename in a "file" attribute)
+
+
+</li>
+
+
+<li><i>file</i>
+
+ a filename
+
+
+</li>
+
+
+<li><i>content</i>
+
+ a namespace path of a file content
+
+
+</li>
+
+
+<li><i>perm</i>
+
+ UNIX file permissions (used when a new file is created), defaults to 0666
+
+
+</li>
+
+
+<li><i>type</i>
+
+ an output format, could be: "text" (by default), "yaml", or "json"
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=mkdir>&lt;mkdir></h3>
+
+
+
+
+<p> Creates files/directories recursively
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- create directory with subdirectory --&gt;
+	&lt;mkdir file=&#34;data/example-write-mkdir/subdirectory&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+</ul>
+
+
+
+<h3 id=rm>&lt;rm></h3>
+
+
+
+
+<p> Removes files/directories recursively
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+	&lt;!-- remove files, created by examples --&gt;
+	&lt;rm file=&#34;data/example-write*&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>except</i>
+
+ comma separated list of file system entries excluded
+
+
+</li>
+
+
+<li><i>path</i>
+
+ a namespace path to the variable containing a filename, used instead of a filename in a "file" attribute)
+
+
+</li>
+
+
+<li><i>file</i>
+
+ a filename or a glob pattern
+
+
+</li>
+
+
+</ul>
+
+
+
+</div></div>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>

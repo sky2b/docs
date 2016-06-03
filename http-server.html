@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="pricer application">
+    <meta name="author" content="sky">
+
+    <title>HTTP server.</title>
+
+    <script src="https://use.fontawesome.com/818d94916d.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.3/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+    <link href="css/add-gears.css" rel="stylesheet">
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
+            <a href="index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="logo.png"></a>
+            <a class="navbar-brand" href="index.html">AddGears</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="getting-started.html">Getting started </a></li>
+                <li><a href="docs/api.html">API </a></li>
+            </ul>
+        </div>
+        
+    </div>
+    
+</nav>
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
+<div class="section"><div class="container">
+<h1>HTTP server</h1>
+
+<p>You may think that to create web server one needs programming skills. Not
+completely untrue, but it turns out a lot could be accomplished
+just by using a few configuration lines. It is both possible to serve static files
+and create API endpoints.</p>
+
+<p>To begin with, to serve <em>static files</em> in directory &ldquo;static&rdquo; it is just enough to
+run the following configuration:</p>
+
+<pre><code class="language-xml">&lt;!-- static target --&gt;
+&lt;!-- starts server and uses port number 0 to bind to any free port --&gt;
+&lt;web-server address=&quot;http://localhost:0&quot;&gt;
+    &lt;!-- serve static files in &quot;static&quot; directory on the &quot;/public&quot; URL-path  --&gt;
+    &lt;directory path=&quot;/public/&quot; directory=&quot;static&quot; strip-prefix=&quot;/public/&quot;/&gt;
+&lt;/web-server&gt;
+</code></pre>
+
+<p>In this configuration a zero value is used for the port (<code>:0</code>), so server will bind
+to the first free port available and will print its address in console. To open &ldquo;test.html&rdquo;
+file from static directory,
+just copy the printed URL from console to your browser, adding &ldquo;/public/test.html&rdquo;.</p>
+
+<p>Serving static assets is useful but this is far from what could be achieved just through
+the clever use of a few configuration options. Today there are dozens of powerful general purpose
+applications, first of all SQL and NoSQL database engines, which can help us to solve 90% percent of
+problems we are facing. We just need to learn how orchestrate data flows.<br />
+To that end an <em><endpoint></em> subcomponent allows us to configure HTTP services, which
+can handle HTTP requests and allow us to pass requests to other available AddPricer components.
+First start with a simple test endpoint:</p>
+
+<pre><code class="language-xml">&lt;!-- api target --&gt;
+&lt;!-- start server on http://localhost:1895 --&gt;
+&lt;web-server address=&quot;http://localhost:1895&quot;&gt;
+    &lt;!-- serve &quot;static&quot; directory on http://localhost:1895/public/ --&gt;
+    &lt;directory path=&quot;/public/&quot; directory=&quot;static&quot; strip-prefix=&quot;/public/&quot;/&gt;
+    &lt;!-- API endpoint on the /api/public URL-path --&gt;
+    &lt;endpoint path=&quot;/api/public&quot;&gt;
+        &lt;!-- HTTP handler executes actions based on the request type (found in &quot;data.type&quot;) --&gt;
+        &lt;http-handler action=&quot;data.type&quot;&gt;
+            &lt;!--
+            extract a JSON object from &quot;data&quot; form value and
+            save it in the &quot;data&quot; variable  
+            --&gt;
+            &lt;request form-value=&quot;data&quot; to=&quot;data&quot; type=&quot;json&quot;/&gt;
+            &lt;!--
+            after the proper action type was executed, we take &quot;reply&quot; variable, serialize
+            it as a JSON object and send back as a plain text reply
+            --&gt;
+            &lt;response path=&quot;reply&quot;/&gt;
+            &lt;!-- if the action type is &quot;test&quot; --&gt;
+            &lt;action type=&quot;test&quot;&gt;
+                &lt;!-- print data received --&gt;
+                &lt;print path=&quot;data&quot;/&gt;
+                &lt;!-- copy &quot;data.payload&quot; to &quot;reply&quot; to send it back --&gt;
+                &lt;copy from=&quot;data.payload&quot; to=&quot;reply&quot;/&gt;
+            &lt;/action&gt;
+            {{ template &quot;authentication.xml&quot; . }}
+        &lt;/http-handler&gt;
+    &lt;/endpoint&gt;
+&lt;/web-server&gt;
+</code></pre>
+
+<p>To run this configuration a new <em>api</em> target was created. It starts web server on
+a port 1895 (change if necessary)
+and serves static files in the same &ldquo;static&rdquo; directory as before. In addition to
+this a new API endpoint was added on the <code>/api/public</code> URL-path.</p>
+
+<p>To understand this configuration one must to remember that every HTTP request comes
+with some data - URL encoded name/value pairs. These values are
+sometimes called <em>form values</em> as originally they were populated almost exclusively
+by HTML form inputs, although in later examples these values are
+populated by page Javascript, or by other applications.</p>
+
+<p>An <em><http-handler></em> subcomponent in the configuration above provides instructions
+how to process incoming POST HTTP requests.
+We specify how data is extracted from requests to
+namespace variables and which namespace variable is used to generate request reply.</p>
+
+<p>In the example above,<code>&lt;request form-value=&quot;data&quot; to=&quot;data&quot; type=&quot;json&quot;/&gt;</code>
+ takes &ldquo;data&rdquo; form value, parses JSON it contains and saves it in a &ldquo;data&rdquo;
+namespace variable. Then <code>&lt;response path=&quot;reply&quot;/&gt;</code> instructs request handler to
+take the value in a
+&ldquo;reply&rdquo; variable, to serialize it as a JSON object and to send it back as a plain text.
+An <code>action=&quot;data.type&quot;</code> attribute of <code>http-handler</code> means that actions are invoked
+based on the value in a &ldquo;data.type&rdquo; variable.</p>
+
+<p>After general data flow scheme is ready,
+you can add new actions and configure how to handle requests
+of specific types. In the example above, the <code>&lt;action type=&quot;test&quot;&gt;</code> component
+provides configuration for our &ldquo;test&rdquo; action. As you can see it
+prints &ldquo;data&rdquo; variable and assigns &ldquo;data.payload&rdquo; to the &ldquo;reply&rdquo; variable
+to send it back to the client.</p>
+
+<p>Effectively it gives us a useful tool, enabling to test data sent\received by
+our web server. As many API functions will be invoked
+from HTML pages, lets create simple playground which will allow us to test
+API functions using JQuery and its handy <code>ajax</code>
+function.</p>
+
+<p>The following snippet (slightly simplified version of the code, which could be
+found in the &ldquo;test.html&rdquo; file)
+creates a button which, when clicked, sends request to the &ldquo;test&rdquo; action of
+our endpoint and, upon the reply, displays the data sent back:</p>
+
+<pre><code class="language-html">&lt;!-- fragment from &quot;static/test.html&quot; file --&gt;
+&lt;div&gt;
+    &lt;!-- button to invoke &quot;test&quot; action --&gt;
+    &lt;button id=&quot;send&quot;&gt;send type=test&lt;/button&gt;
+    &lt;!-- display results --&gt;
+    &lt;p&gt;&lt;tt id=&quot;test-results&quot;&gt;&lt;/tt&gt;&lt;/p&gt;
+
+    &lt;script&gt;
+
+    function testApiEndpoint() {
+        // the message has a property &quot;type&quot; which is equal to &quot;test&quot;
+        // - ID of the action we invoke
+        var message = {
+            type:&quot;test&quot;,
+            payload:&quot;payload&quot;
+        };
+        $(&quot;#test-results&quot;).text( &quot;sending request&quot;);
+
+        $.ajax({
+            method:&quot;POST&quot;,
+            url: &quot;../api/public&quot;,
+            // the property to set form values
+            data:{
+                // &quot;data&quot; form value is our serialized message
+                data:JSON.stringify(message)
+            },
+        })
+        .done(function(data) {
+            // returned value should be a string, containing data we sent in a payload property
+            $(&quot;#test-results&quot;).text( &quot;done: type=&quot; + (typeof data) + &quot;; result=&quot; + data );
+        })
+        .fail(function(err) {
+            $(&quot;#test-results&quot;).text( &quot;failed: error=&quot; + err.responseText );
+        })
+        ;
+    }
+
+    $(&quot;#send&quot;).click(testApiEndpoint);
+    &lt;/script&gt;
+&lt;/div&gt;
+</code></pre>
+
+<p>To send form values using JQuery use data option of <code>ajax</code> function.
+Assign it an object with a property &ldquo;data&rdquo; (for &ldquo;data&rdquo; form value).
+ We pass there a serialized JSON message. The message has a &ldquo;type&rdquo; field
+ populated with a &ldquo;test&rdquo; value to invoke our &ldquo;test&rdquo; action, and a &ldquo;payload&rdquo; field,
+ containing a dummy &ldquo;payload&rdquo; string.
+ When the &ldquo;send type=test&rdquo; button
+ is pressed, our API endpoint prints <code>type=test payload=payload</code> (&ldquo;data&rdquo; form value) and
+&ldquo;test.html&rdquo; page displays <code>done: type=string; result=payload</code>.</p>
+
+<p>Requests to our endpoint could be sent not only by Javascript.
+AddPricer can send message too using the following configuration:</p>
+
+<pre><code class="language-html">&lt;!-- &quot;test-request&quot; target --&gt;
+&lt;all&gt;
+    &lt;!-- define message to send --&gt;
+    &lt;json&gt;{&quot;message&quot;:{&quot;type&quot;:&quot;test&quot;, &quot;payload&quot;:{&quot;id&quot;:5}}}&lt;/json&gt;
+    &lt;!--
+        post request to the URL specified
+        put reply to a &quot;data&quot; variable (parsing received strings as a JSON)
+    --&gt;
+    &lt;post url=&quot;http://localhost:1895/api/public&quot; to=&quot;data&quot; json=&quot;true&quot;&gt;
+        &lt;!-- get an object in a &quot;message&quot; variable, serialize it and send as a &quot;data&quot; form value --&gt;
+        &lt;data path=&quot;message&quot; name=&quot;data&quot;/&gt;
+    &lt;/post&gt;
+&lt;/all&gt;
+</code></pre>
+
+<p>The target above could be executed using <code>-run &quot;test-request,print-data&quot;</code> option.
+This first sends request and then prints &ldquo;data&rdquo; namespace variable (<code>id=5</code>).</p>
+
+<p>Before we move on to the next
+topic (API requests authentication),
+we may wish to extract an URL of our public API from <code>*.xml</code> files into one
+centralized location - &ldquo;getting-started/config.yaml&rdquo;
+configuration file. Then instead of copying URL value over multiple files we may
+use template parameter <code>{{ .api.public.url }}</code>, which we can change by modifying
+just one configuration file. The &ldquo;config.yaml&rdquo;
+file is loaded by our special <code>*</code> (asterisk) target (always
+executed before any other target in a makefile).</p>
+
+</div></div>
+<script src="//cdn.jsdelivr.net/highlight.js/9.3.0/highlight.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+</script>
+
+<script src="js/modern-business.js"></script>
+
+
+</body>
+
+</html>
+
+
