@@ -32,15 +32,16 @@
                 <span class="icon-bar"></span>
             </button>
             
-            <a href="../index.html" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
-            <a class="navbar-brand" href="../index.html"></a>
+            <a href="" style="float:left;padding: 0 10px;"><img class="img-responsive" src="../logo.png"></a>
+            <a class="navbar-brand" href=""></a>
         </div>
 
         
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="getting-started.html">Getting started </a></li>
-                <li><a href="docs/api.html">API </a></li>
+                <li><a href="../">Home</a></li>
+                <li><a href="../getting-started.html">Getting started </a></li>
+                <li><a href="../docs/api.html">API </a></li>
             </ul>
         </div>
         
@@ -349,13 +350,13 @@ describing the errors encountered (with &#34;line&#34;, &#34;column&#34; and &#3
 
 
 
-<p> Copy directories recursively
+<p> Move (extract) files/directories matching some glob pattern to the specified directory.
 </p>
 
 
 
-<pre><code class="language-xml">&lt;!-- copy configuration files into subdirectory --&gt;
-&lt;file-move to=&#34;data/example-write-dir-copy/sub&#34; from=&#34;getting-started/*&#34;/&gt;
+<pre><code class="language-xml">&lt;!-- move configuration files from &#34;getting-started&#34; into &#34;data/sub&#34; subdirectory --&gt;
+&lt;file-move to=&#34;data/sub&#34; from=&#34;getting-started/*&#34;/&gt;
 </code></pre>
 
 
@@ -472,7 +473,7 @@ otherwise the content is appended
         &#34;field2&#34; : true
     }&lt;/json&gt;
     &lt;!-- save the &#34;data&#34; variable to the &#34;data/example-write-file.txt&#34; file in YAML format --&gt;
-    &lt;file-write type=&#34;yaml&#34; file=&#34;data/example-write-file.txt&#34; to=&#34;content&#34;/&gt;
+    &lt;file-write type=&#34;yaml&#34; file=&#34;data/example-write-file.txt&#34;/&gt;
 &lt;/all&gt;
 </code></pre>
 
