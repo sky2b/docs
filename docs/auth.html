@@ -68,12 +68,14 @@
 
 
 
-<p> Register or login user. An &lt;auth&gt; component is responsible to
-    register/check user credentials. A &lt;sql-auth/&gt; component is required to store
-    user credentials in database (you also need &lt;db&gt; for database connection
-    and proper database scheme). This component is usually utilized with &lt;jwt/&gt; component,
-    which generates JWT token for
-    later use with protected API endpoints.
+<p> A user authentication component. Supports multiple operations (see type attribute):
+    &#34;login&#34;, &#34;register&#34;, &#34;delete&#34;, &#34;remind&#34; (password), &#34;change&#34; (password). The authentication
+    result is stored in namespace path given by &#34;to&#34; attribute. Result contains
+    &#34;user&#34;, &#34;action&#34;, &#34;error&#34; and &#34;password&#34; (password generated for &#34;remind&#34; action).
+    An &lt;sql-auth/&gt; component is required to store
+    user credentials in database (uses &#34;auth&#34; database table).
+    Use &lt;db&gt; component to setup database connection.
+    This component is often used with &lt;jwt/&gt; component to generates JWT token.
 </p>
 
 
@@ -81,7 +83,15 @@
 <pre><code class="language-xml">&lt;action type=&#34;register,login&#34;&gt;
     &lt;!-- we need database for persistence --&gt;
     {{ template &#34;db.xml&#34; . }}
-    &lt;!-- use SQL database for data persistence--&gt;
+    &lt;!--
+    use SQL database for data persistence
+    requires &#34;auth&#34; table:
+    CREATE TABLE AUTH (
+      ID VARCHAR(50),
+      DATA VARCHAR(250),
+      PRIMARY KEY (ID)
+    );
+    --&gt;
     &lt;sql-auth/&gt;
     &lt;!--
     Check password, taking user name and password from the user request data

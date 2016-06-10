@@ -201,6 +201,48 @@
 
 
 
+<h3 id=date>&lt;date></h3>
+
+
+
+
+<p>Component to convert from Unix timestamp to date.
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- till is converted to string format --&gt;
+    &lt;date path=&#34;data.till&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path containing timestamp converted to string format
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for date value produced
+
+
+</li>
+
+
+</ul>
+
+
+
 <h3 id=each>&lt;each></h3>
 
 
@@ -488,6 +530,14 @@
 </li>
 
 
+<li><i>message</i>
+
+ a message to print
+
+
+</li>
+
+
 </ul>
 
 
@@ -533,6 +583,58 @@
 <li><i>format</i>
 
  a format specifier
+
+
+</li>
+
+
+</ul>
+
+
+
+<h3 id=timestamp>&lt;timestamp></h3>
+
+
+
+
+<p>The component to convert from date to Unix timestamp. Format of the string must be specified
+following Go language conventions using mnemonics: two for the month, one for day of the month,
+three for the hour (in 12-hour time), four for the minutes, etc
+</p>
+
+
+
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- till is converted from string format dd/mm/yyyy to int64 --&gt;
+    &lt;timestamp path=&#34;data.till&#34; format=&#34;02/01/2006&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path containing date
+
+
+</li>
+
+
+<li><i>format</i>
+
+ a date string format (follows Go language conventions)
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path for value produced
 
 
 </li>
