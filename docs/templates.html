@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="pricer application">
     <meta name="author" content="sky">
 
-    <title>Modules</title>
+    <title>Templates</title>
 
     <script src="https://use.fontawesome.com/818d94916d.js"></script>
 
@@ -52,41 +51,89 @@
 
 
 <div class="section"><div class="container">
-<h1>Modules</h1>
-<style>
-.modules-list li {padding-top: 10px;}
-</style>
-<ol class="modules-list">
+<h1 id="module_templates">Templates</h1>
 
-<li><a href="array.html"> Array functions</a></li>
 
-<li><a href="core.html"> Core components</a></li>
+<p>
+	Commands to execute Go language templates.
+</p>
 
-<li><a href="mail.html"> Emails</a></li>
 
-<li><a href="files.html"> Filesystem</a></li>
 
-<li><a href="http-client.html"> HTTP requests</a></li>
 
-<li><a href="web.html"> HTTP server</a></li>
 
-<li><a href="harvester.html"> Harvester</a></li>
 
-<li><a href="isbn.html"> ISBN utilities</a></li>
+<h3 id=template-execute>&lt;template-execute></h3>
 
-<li><a href="jwt.html"> JWT</a></li>
 
-<li><a href="sql.html"> SQL Databases</a></li>
 
-<li><a href="clef.html"> Scripting</a></li>
 
-<li><a href="templates.html"> Templates</a></li>
+<p> Executes template</p>
 
-<li><a href="auth.html"> User authentication</a></li>
 
-<li><a href="scraper.html"> Web scraper</a></li>
 
-</ol>
+<pre><code class="language-xml">&lt;all&gt;
+    &lt;!-- read HTML templates in &#34;templates&#34; directory --&gt;
+    &lt;file-read type=&#34;template&#34; file=&#34;templates/*.html&#34; to=&#34;templates&#34; glob=&#34;true&#34;/&gt;
+    &lt;!--
+        execute the template above. By default &#34;page.html&#34; template is executed,
+        otherwise a template name is taken from &#34;data.template&#34; namespace path.
+        A template data object is taken from &#34;data&#34; path.
+        And the resulting page is stored in a &#34;page.content&#34; variable.
+     --&gt;
+    &lt;template-execute path=&#34;templates&#34; to=&#34;page.content&#34; name=&#34;page.html&#34; name-path=&#34;data.template&#34; data-path=&#34;data&#34;/&gt;
+&lt;/all&gt;
+</code></pre>
+
+
+
+
+
+<ul>
+
+<li><i>path</i>
+
+ a namespace path to a template
+
+
+</li>
+
+
+<li><i>to</i>
+
+ a namespace path where a generated content is stored
+
+
+</li>
+
+
+<li><i>data-path</i>
+
+ a namespace path to template data
+
+
+</li>
+
+
+<li><i>name</i>
+
+ an optional name of the template to execute
+
+
+</li>
+
+
+<li><i>name-path</i>
+
+ an optional name of the template to execute (when given is used instead of the name attribute)
+
+
+</li>
+
+
+</ul>
+
+
 
 </div></div>
 

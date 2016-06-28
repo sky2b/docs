@@ -227,7 +227,7 @@
 
 	&lt;!-- insert new records from an array of objects --&gt;
 	&lt;update-many sql=&#34;insert into example_sql (isbn13,price) values (?,?)&#34;&gt;
-        &lt;!-- take an array of objects from the &#34;data&#34; namespace path -&gt;
+        &lt;!-- take an array of objects from the &#34;data&#34; namespace path --&gt;
         &lt;params path=&#34;data&#34;&gt;
             &lt;!-- teke &#34;isbn&#34; property as the first query parameter --&gt;
             &lt;param path=&#34;isbn&#34;/&gt;
@@ -395,6 +395,14 @@
 <li><i>sql</i>
 
  an SQL statement
+
+
+</li>
+
+
+<li><i>sql-path</i>
+
+ a namespace path to SQL statement (when given, is used instead of "sql" attribute)
 
 
 </li>

@@ -53,10 +53,10 @@
 
 <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.3.0/styles/default.min.css">
 <div class="section"><div class="container">
-<h1>Makefiles</h1>
+<h1>Execution targets</h1>
 
-<p>The purpose of <em>AddPricer</em> makefiles is to assemble <em>xml</em> configuration files and
-to define and execute user selected targets. If you open the <em>getting-started.yaml</em>
+<p>The purpose of <em>AddPricer</em> makefiles is to assemble XML configuration files and
+to define and execute user selected <em>targets</em>. If you open the <em>getting-started.yaml</em>
 makefile, we already used in our pretty contrived namespace example, you may
 discover that it contains the following <em>namespace</em> target definition:</p>
 
@@ -88,6 +88,8 @@ either strings or string lists too.</p>
 
 <p>There are only four target options: <em>config</em>, <em>run</em>, <em>params</em> and <em>file</em>.</p>
 
+<h1>Configuration templates</h1>
+
 <p>The <em>config</em> option is a <a href="https://en.wikipedia.org/wiki/Glob_(programming)">glob pattern</a>,
 matching configuration files used to generate the target configuration.
 It could be either one glob pattern or a list of glob patterns:</p>
@@ -110,6 +112,8 @@ Also please note, that template parser is smart enough to
 properly escape
 XML attributes and content (but as a result you can&rsquo;t use CDATA sections as they are escaped too).</p>
 
+<h1>Specifying the configuration file executed</h1>
+
 <p>The name of the main, executed template file is given by the makefile option <em>run</em>.
 When executed, main template must generate a valid <em>XML</em> configuration.<br />
 For example, some our configuration
@@ -124,8 +128,10 @@ file could look like this:</p>
 &lt;/all&gt;
 </code></pre>
 
-<p><em>Template variables</em> or <em>parameters</em>
-could be defined using the makefile <em>params</em> option. This option cold be either an object:</p>
+<h1>Configuration parameters</h1>
+
+<p><em>Template variables</em> or <em>parameters</em> could be defined using the makefile <em>params</em>
+option. This option cold be either an object:</p>
 
 <pre><code class="language-yaml">target:
     # parameter &quot;num&quot; definition
@@ -144,8 +150,12 @@ could be defined using the makefile <em>params</em> option. This option cold be 
 <p>When makefile generates targets, parameters are passed from target to target,
 old values are overwritten by most recent <em>params</em> definitions.</p>
 
+<h1>Makefile execution</h1>
+
 <p>The executed makefile target is selected through the <em>-run</em> addgears parameter (otherwise the <em>default</em> target is invoked).
 It is also possible to specify multiple targets (separated by commas): <code>addgears -run &quot;target1,target2&quot;</code></p>
+
+<h1>Makefile inclusion</h1>
 
 <p>Yet another possibility is to combine makefiles using the <em>file</em> makefile option. All targets from the matching
 makefile(s) are added to the targets already present (existing targets remain unchanged). Inclusion targets
